@@ -1,5 +1,8 @@
 package chess;
 
+import chess.calculator.PieceMovesCalculator;
+import chess.calculator.RookCalculator;
+
 import java.util.Collection;
 
 /**
@@ -47,6 +50,9 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        if (myPosition == ChessPiece.rook) {
+            PieceMovesCalculator calc = new RookCalculator();
+            return calc.
+        }
     }
 }
