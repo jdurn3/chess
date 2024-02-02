@@ -46,8 +46,32 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
+
+    public ChessPiece[][] copyChessboard(ChessBoard board) {
+        ChessPiece[][] copiedBoard = new ChessPiece[8][8];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                if (board.getPiece(position) != null) {
+                    copiedBoard[row][col] = new ChessPiece(board.getPiece(position).getTeamColor(), board.getPiece(position).getPieceType());
+                } else {
+                    copiedBoard[row][col] = null;
+                }
+            }
+        }
+        return copiedBoard;
+    }
+
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        TeamColor team = getTeamTurn();
+        if ((piece != null) && (piece.getTeamColor() == team)) {
+            Collection<ChessMove> possibleMoves = ChessPiece.pieceMoves(board, startPosition);
+            for (ChessMove move: possibleMoves) {
+                makeMove(move);
+
+            }
+        }
     }
 
     /**
