@@ -11,6 +11,9 @@ import java.util.Arrays;
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
 
+    public ChessBoard(ChessPiece[][] copiedBoard) {
+        this.squares = copiedBoard;
+    }
 
     public ChessBoard() {
         

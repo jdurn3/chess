@@ -47,10 +47,10 @@ public class ChessGame {
      * startPosition
      */
 
-    public ChessPiece[][] copyChessboard(ChessBoard board) {
+    public ChessBoard copyChessboard(ChessBoard board) {
         ChessPiece[][] copiedBoard = new ChessPiece[8][8];
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
                 ChessPosition position = new ChessPosition(row, col);
                 if (board.getPiece(position) != null) {
                     copiedBoard[row][col] = new ChessPiece(board.getPiece(position).getTeamColor(), board.getPiece(position).getPieceType());
@@ -59,14 +59,14 @@ public class ChessGame {
                 }
             }
         }
-        return copiedBoard;
+        return new ChessBoard(copiedBoard);
     }
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
         TeamColor team = getTeamTurn();
         if ((piece != null) && (piece.getTeamColor() == team)) {
-            Collection<ChessMove> possibleMoves = ChessPiece.pieceMoves(board, startPosition);
+            Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
             for (ChessMove move: possibleMoves) {
                 makeMove(move);
 
@@ -80,6 +80,9 @@ public class ChessGame {
      * @param move chess move to preform
      * @throws InvalidMoveException if move is invalid
      */
+
+
+
     public void makeMove(ChessMove move) throws InvalidMoveException {
         throw new RuntimeException("Not implemented");
     }
@@ -91,7 +94,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> otherTeamMoves;
     }
 
     /**
