@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -66,12 +68,28 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
         TeamColor team = getTeamTurn();
         if ((piece != null) && (piece.getTeamColor() == team)) {
+            if (isInCheck(team)) {
+
+            }
             Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
             for (ChessMove move: possibleMoves) {
                 makeMove(move);
 
             }
         }
+    }
+
+    public ChessPosition findKing(TeamColor teamColor) {
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if ((piece.getPieceType() == ChessPiece.PieceType.KING) && (piece.getTeamColor() == teamColor)) {
+                    return position;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -94,7 +112,23 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        Collection<ChessMove> otherTeamMoves;
+        Collection<ChessMove> otherTeamMoves = new HashSet<>();
+        ChessPosition kingPosition = findKing(team);
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if ((piece != null) && (piece.getTeamColor() != teamColor)) {
+                    otherTeamMoves.addAll(piece.pieceMoves(board, position));
+                }
+            }
+        }
+        for (ChessMove move : otherTeamMoves) {
+            if (kingPosition == move.getEndPosition()){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
