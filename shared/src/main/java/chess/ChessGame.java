@@ -83,7 +83,20 @@ public class ChessGame {
                 }
                 return validMoves;
             }
+            if (isInStalemate(team)) {
+                return null;
+            }
+            Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+            for (ChessMove move : possibleMoves) {
+                ChessBoard copy = copyChessboard(board);
+                moveCopiedBoard(move, copy, piece);
+                if (!isInCheckCopy(team, copy)) {
+                    validMoves.add(move);
+                }
+            }
+            return validMoves;
         }
+        return null;
     }
 
     /**
@@ -96,7 +109,15 @@ public class ChessGame {
 
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if (validMoves.contains(move)) {
+            ChessPiece piece = board.getPiece(move.getStartPosition());
+            board.addPiece(move.getEndPosition(), piece);
+            board.addPiece(move.getStartPosition(), null);
+        }
+        else {
+            throw new InvalidMoveException("Invalid Move");
+        }
     }
 
     public void moveCopiedBoard(ChessMove move, ChessBoard copy, ChessPiece piece){
@@ -197,7 +218,31 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> validMoves = new HashSet<>();
+        if (!(isInCheckmate(teamColor))) {
+            Collection<ChessMove> possibleMoves = new HashSet<>();
+            for (int row = 1; row < 9; row++) {
+                for (int col = 1; col < 9; col++) {
+                    ChessPosition position = new ChessPosition(row, col);
+                    ChessPiece piece = board.getPiece(position);
+                    if ((piece != null) && (piece.getTeamColor() == teamColor)) {
+                        possibleMoves.addAll(piece.pieceMoves(board, position));
+                    }
+                }
+            }
+            for (ChessMove move : possibleMoves) {
+                ChessPiece piece = board.getPiece(move.getStartPosition());
+                ChessBoard copy = copyChessboard(board);
+                moveCopiedBoard(move, copy, piece);
+                if (!isInCheckCopy(team, copy)) {
+                    validMoves.add(move);
+                }
+            }
+            return validMoves.isEmpty();
+        }
+        else {
+            return false;
+        }
     }
 
     /**
