@@ -65,20 +65,33 @@ public class ChessGame {
     }
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        Collection<ChessMove> validMoves = new HashSet<>();
         ChessPiece piece = board.getPiece(startPosition);
         TeamColor team = getTeamTurn();
         if ((piece != null) && (piece.getTeamColor() == team)) {
             if (isInCheck(team)) {
-
+                Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+                for (ChessMove move : possibleMoves) {
+                    ChessBoard copy = copyChessboard(board);
+                    moveCopiedBoard(move, copy, piece);
+                    if (!isInCheckCopy(team, copy)) {
+                        validMoves.add(move);
+                    }
+                }
+                return validMoves;
             }
-            Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
-            for (ChessMove move: possibleMoves) {
-                makeMove(move);
+                Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
+                for (ChessMove move : possibleMoves) {
+                    makeMove(move);
 
-            }
+                }
         }
     }
 
+    public void moveCopiedBoard(ChessMove move, ChessBoard copy, ChessPiece piece){
+        copy.addPiece(move.getEndPosition(), piece);
+        copy.addPiece(move.getStartPosition(), null);
+    }
     public ChessPosition findKing(TeamColor teamColor) {
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++) {
@@ -111,6 +124,25 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+    public boolean isInCheckCopy(TeamColor teamColor, ChessBoard copy) {
+        Collection<ChessMove> otherTeamMoves = new HashSet<>();
+        ChessPosition kingPosition = findKing(team);
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = copy.getPiece(position);
+                if ((piece != null) && (piece.getTeamColor() != teamColor)) {
+                    otherTeamMoves.addAll(piece.pieceMoves(copy, position));
+                }
+            }
+        }
+        for (ChessMove move : otherTeamMoves) {
+            if (kingPosition == move.getEndPosition()){
+                return true;
+            }
+        }
+        return false;
+    }
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessMove> otherTeamMoves = new HashSet<>();
         ChessPosition kingPosition = findKing(team);
