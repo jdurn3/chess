@@ -1,6 +1,6 @@
 package service;
 
-public class chessService {
+public class ChessService {
     public void clear() throws ResponseException {
         dataAccess.clear();
     }

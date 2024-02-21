@@ -1,4 +1,4 @@
 package dataAccess;
 
-public class update {
+public class Delete {
 }

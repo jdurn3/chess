@@ -1,4 +1,4 @@
 package dataAccess;
 
-public class read {
+public class Read {
 }
