@@ -1,6 +1,7 @@
 package model;
 
 
-public class AuthData {
-    record authData(String authToken, String username) {}
-}
+public record AuthData (
+        String authToken,
+        String username) {}
+
