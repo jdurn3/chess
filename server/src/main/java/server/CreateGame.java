@@ -14,15 +14,16 @@ public class CreateGame {
     public Object createGame(Request req, Response res) {
         gameName newGameName = new Gson().fromJson(req.body(), gameName.class);
         String authToken = req.headers("Authorization");
+        int gameID;
         try {
-            new GameService().createGame(authToken, newGameName.gameName(), Server.authDAO, Server.gameDAO);
+            gameID = new GameService().createGame(authToken, newGameName.gameName(), Server.authDAO, Server.gameDAO);
         } catch (DataAccessException e) {
             return Exceptions.giveException(e, res);
         }
-        var body = new Gson().toJson(newGameName);
+        var body = new Gson().toJson(new CreateResponse(gameID));
         res.type("application/json");
         res.status(200);
         res.body(body);
-        return "{}";
+        return body;
     }
 }

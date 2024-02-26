@@ -1,5 +1,6 @@
 package dataAccess;
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 import server.Constants;
 
 import javax.xml.crypto.Data;
@@ -36,10 +37,19 @@ public class UserMemoryAccess {
             }
         }
 
-    public void checkPassword(String password, String given_password) throws DataAccessException {
-        if (password != given_password) {
-            throw new DataAccessException(Constants.BAD_REQUEST);
+    public String checkPassword(String password, String given_password) throws DataAccessException {
+        if (Objects.equals(password, given_password)) {
+            return password;
+        }
+        else {
+            throw new DataAccessException(Constants.UNAUTHORIZED);
         }
     }
 
+    public UserData validPassword(UserData user) throws DataAccessException {
+        if (user.password() == null ) {
+            throw new DataAccessException(Constants.BAD_REQUEST);
+        }
+        return user;
+    }
 }

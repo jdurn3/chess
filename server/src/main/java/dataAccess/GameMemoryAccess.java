@@ -35,9 +35,6 @@ public class GameMemoryAccess {
     }
 
     public GameData checkPlayer(GameData game, ChessGame.TeamColor playerColor) throws DataAccessException {
-//        if (playerColor == null) {
-//            throw new DataAccessException(Constants.ALREADY_TAKEN);
-//        }
         if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             String user = game.whiteUsername();
             if (user != null) {
