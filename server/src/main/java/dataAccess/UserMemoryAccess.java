@@ -2,7 +2,9 @@ package dataAccess;
 import model.UserData;
 import server.Constants;
 
+import javax.xml.crypto.Data;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class UserMemoryAccess {
     final private HashMap<String, UserData> users = new HashMap<>();
@@ -33,5 +35,11 @@ public class UserMemoryAccess {
                 return username;
             }
         }
+
+    public void checkPassword(String password, String given_password) throws DataAccessException {
+        if (password != given_password) {
+            throw new DataAccessException(Constants.BAD_REQUEST);
+        }
+    }
 
 }

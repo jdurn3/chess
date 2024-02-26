@@ -16,7 +16,8 @@ public class UserService {
     }
     public AuthData login(UserData user, UserMemoryAccess userDAO, AuthMemoryAccess authDAO) throws DataAccessException {
         String username = user.username();
-        userDAO.getUser(username);
+        UserData selected_user = userDAO.getUser(username);
+        //userDAO.checkPassword(selected_user.password(), user.username());
         return authDAO.createAuth(username);
     }
 

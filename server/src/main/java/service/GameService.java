@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.AuthMemoryAccess;
 import dataAccess.DataAccessException;
 import dataAccess.GameMemoryAccess;
@@ -21,7 +22,7 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-    public GameData joinGame(String authToken, String playerColor, int gameID, AuthMemoryAccess authDAO, GameMemoryAccess gameDAO) throws DataAccessException {
+    public GameData joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID, AuthMemoryAccess authDAO, GameMemoryAccess gameDAO) throws DataAccessException {
         AuthData user = authDAO.getAuth(authToken);
         String username = user.username();
         GameData game = gameDAO.getGame(gameID);

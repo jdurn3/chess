@@ -18,22 +18,7 @@ public class Login {
         try {
             authToken = new UserService().login(newUser, Server.userDAO, Server.authDAO);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
-                Error error = new Error(e.getMessage());
-                var body = new Gson().toJson(error);
-                res.type("application/json");
-                res.status(401);
-                res.body(body);
-                return body;
-            }
-            if (e.getMessage().equals(Constants.DESCRIPTION)) {
-                Error error = new Error(e.getMessage());
-                var body = new Gson().toJson(error);
-                res.type("application/json");
-                res.status(500);
-                res.body(body);
-                return body;
-            }
+            return Exceptions.giveException(e, res);
         }
         var body = new Gson().toJson(new RegisterResponse(authToken.username(), authToken.authToken()));
         res.type("application/json");

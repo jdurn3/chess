@@ -34,14 +34,17 @@ public class GameMemoryAccess {
         }
     }
 
-    public GameData checkPlayer(GameData game, String playerColor) throws DataAccessException {
-        if (Objects.equals(playerColor, "WHITE")) {
+    public GameData checkPlayer(GameData game, ChessGame.TeamColor playerColor) throws DataAccessException {
+//        if (playerColor == null) {
+//            throw new DataAccessException(Constants.ALREADY_TAKEN);
+//        }
+        if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             String user = game.whiteUsername();
             if (user != null) {
                 throw new DataAccessException(Constants.ALREADY_TAKEN);
             }
         }
-        if (Objects.equals(playerColor, "BLACK")) {
+        if (Objects.equals(playerColor, ChessGame.TeamColor.BLACK)) {
             String user = game.blackUsername();
             if (user != null) {
                 throw new DataAccessException(Constants.ALREADY_TAKEN);
@@ -50,9 +53,9 @@ public class GameMemoryAccess {
         return game;
     }
 
-    public GameData joinGame(GameData game, int gameID, String playerColor, String username) {
+    public GameData joinGame(GameData game, int gameID, ChessGame.TeamColor playerColor, String username) {
         GameData new_game;
-        if (Objects.equals(playerColor, "WHITE")) {
+        if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             new_game = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
         }
        else {

@@ -14,14 +14,7 @@ public class Logout {
         try {
             new UserService().logout(authToken, Server.authDAO);
         } catch (DataAccessException e) {
-            if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
-                Error error = new Error(e.getMessage());
-                var body = new Gson().toJson(error);
-                res.type("application/json");
-                res.status(401);
-                res.body(body);
-                return body;
-            }
+            return Exceptions.giveException(e, res);
         }
         res.status(200);
         return "{}";
