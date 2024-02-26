@@ -1,9 +1,8 @@
 package dataAccess;
-import model.AuthData;
 import model.UserData;
+import server.Constants;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class UserMemoryAccess {
     final private HashMap<String, UserData> users = new HashMap<>();
@@ -20,10 +19,19 @@ public class UserMemoryAccess {
     public UserData getUser(String username) throws DataAccessException {
         if (users.containsKey(username)) {
             return users.get(username);
-        }
-        else {
-            throw new DataAccessException("No User Found");
+        } else {
+            throw new DataAccessException(Constants.UNAUTHORIZED);
 
+        }
     }
+
+    public String checkUser(String username) throws DataAccessException {
+            if (users.containsKey(username)) {
+                throw new DataAccessException(Constants.ALREADY_TAKEN);
+            }
+            else {
+                return username;
+            }
+        }
 
 }

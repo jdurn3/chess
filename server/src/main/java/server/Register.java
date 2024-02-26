@@ -15,11 +15,27 @@ public class Register {
         try {
             authToken = new UserService().register(newUser);
         } catch (DataAccessException e) {
-            var body = new Gson().toJson(e.getMessage());
-            res.type("application/json");
-            res.status(403);
-            res.body(body);
-            return body;
+            if (e.getMessage().equals(Constants.BAD_REQUEST)) {
+                var body = new Gson().toJson(e.getMessage());
+                res.type("application/json");
+                res.status(400);
+                res.body(body);
+                return body;
+            }
+            if (e.getMessage().equals(Constants.ALREADY_TAKEN)) {
+                var body = new Gson().toJson(e.getMessage());
+                res.type("application/json");
+                res.status(403);
+                res.body(body);
+                return body;
+            }
+            if (e.getMessage().equals(Constants.DESCRIPTION)) {
+                var body = new Gson().toJson(e.getMessage());
+                res.type("application/json");
+                res.status(500);
+                res.body(body);
+                return body;
+            }
         }
         var body = new Gson().toJson(authToken);
         res.type("application/json");
@@ -28,4 +44,4 @@ public class Register {
         return body;
         }
     }
-}
+

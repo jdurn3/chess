@@ -5,7 +5,9 @@ import spark.Response;
 
 
 public class Clear {
-    public Object clear(Request req, Response res){
+    public Object clear(Request req, Response res) {
         new GameService().clear();
+        res.status(200);
+        return res;
     }
 }
