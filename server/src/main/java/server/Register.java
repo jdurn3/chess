@@ -1,8 +1,8 @@
 package server;
 import dataAccess.DataAccessException;
 import model.Error;
+import model.RegisterResponse;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import service.UserService;
 import spark.*;
 import com.google.gson.Gson;
@@ -14,7 +14,7 @@ public class Register {
         UserData newUser = new Gson().fromJson(information, UserData.class);
         AuthData authToken = null;
         try {
-            authToken = new UserService().register(newUser);
+            authToken = new UserService().register(newUser, Server.userDAO, Server.authDAO);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.BAD_REQUEST)) {
                 Error error = new Error(e.getMessage());
@@ -41,6 +41,7 @@ public class Register {
                 return body;
             }
         }
+        //RegisterResponse response = new RegisterResponse(newUser.username(), authToken.authToken());
         var body = new Gson().toJson(authToken);
         res.type("application/json");
         res.status(200);

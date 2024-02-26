@@ -8,21 +8,21 @@ import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 
 public class UserService {
-    public AuthData register(UserData user) throws DataAccessException {
-        new UserMemoryAccess().createUser(user);
+    public AuthData register(UserData user, UserMemoryAccess userDAO, AuthMemoryAccess authDAO) throws DataAccessException {
         String username = user.username();
-        new UserMemoryAccess().getUser(username);
-        new UserMemoryAccess().checkUser(username);
-        return new AuthMemoryAccess().createAuth(username);
+        userDAO.checkUser(username);
+        userDAO.createUser(user);
+        return authDAO.createAuth(username);
     }
-    public AuthData login(UserData user) throws DataAccessException {
+    public AuthData login(UserData user, UserMemoryAccess userDAO, AuthMemoryAccess authDAO) throws DataAccessException {
         String username = user.username();
-        new UserMemoryAccess().getUser(username);
-        return new AuthMemoryAccess().createAuth(username);
+        userDAO.getUser(username);
+        return authDAO.createAuth(username);
     }
-    public void logout(String authToken) throws DataAccessException{
-        new AuthMemoryAccess().getAuth(authToken);
-        new AuthMemoryAccess().deleteAuth(authToken);
+
+    public void logout(String authToken, AuthMemoryAccess authDAO) throws DataAccessException{
+        authDAO.getAuth(authToken);
+        authDAO.deleteAuth(authToken);
 
     }
 

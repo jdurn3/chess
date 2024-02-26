@@ -14,7 +14,7 @@ public class ListGames {
         String authToken = req.headers("Authorization");
         Object[] list = new Object[0];
         try {
-            list = new GameService().listGames(authToken).toArray();
+            list = new GameService().listGames(authToken, Server.authDAO, Server.gameDAO).toArray();
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
                 Error error = new Error(e.getMessage());

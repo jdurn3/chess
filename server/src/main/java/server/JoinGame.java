@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import model.Error;
 import model.GameData;
+import model.Join;
+import model.UserData;
 import service.GameService;
 import spark.Request;
 import spark.Response;
@@ -11,10 +13,9 @@ import spark.Response;
 public class JoinGame {
     public Object joinGame(Request req, Response res) {
         String authToken = req.headers("authorization");
-        String playerColor = req.queryParams("playerColor");
-        int gameID = Integer.parseInt(req.queryParams("gameID"));
+        Join newPlayer = new Gson().fromJson(req.body(), Join.class);
         try {
-            return new GameService().joinGame(authToken, playerColor, gameID);
+            return new GameService().joinGame(authToken, newPlayer.playerColor(), newPlayer.gameID(), Server.authDAO, Server.gameDAO);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.BAD_REQUEST)) {
                 Error error = new Error(e.getMessage());

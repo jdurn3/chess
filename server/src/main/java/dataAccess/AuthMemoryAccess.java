@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 public class AuthMemoryAccess {
     final private HashMap<String, AuthData> authTokens = new HashMap<>();
-    public AuthData createAuth(String username) {
+    public AuthData createAuth(String username) throws DataAccessException{
         String authToken = UUID.randomUUID().toString();
         AuthData newAuth = new AuthData(authToken, username);
         authTokens.put(authToken, newAuth);
@@ -29,6 +29,6 @@ public class AuthMemoryAccess {
     }
 
     public void deleteAuth(String authToken) {
-        authTokens.values().removeIf(authData -> authData.authToken().equals(authToken));
+        authTokens.remove(authToken);
     }
 }

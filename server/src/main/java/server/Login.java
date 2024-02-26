@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import model.AuthData;
 import model.Error;
+import model.RegisterResponse;
 import model.UserData;
 import service.UserService;
 import spark.Request;
@@ -15,7 +16,7 @@ public class Login {
         UserData newUser = new Gson().fromJson(information, UserData.class);
         AuthData authToken = null;
         try {
-            authToken = new UserService().register(newUser);
+            authToken = new UserService().login(newUser, Server.userDAO, Server.authDAO);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
                 Error error = new Error(e.getMessage());
@@ -34,7 +35,7 @@ public class Login {
                 return body;
             }
         }
-        var body = new Gson().toJson(authToken);
+        var body = new Gson().toJson(new RegisterResponse(authToken.username(), authToken.authToken()));
         res.type("application/json");
         res.status(200);
         res.body(body);

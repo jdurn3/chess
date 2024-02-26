@@ -12,7 +12,7 @@ public class Logout {
     public Object logout(Request req, Response res) {
         String authToken = req.headers("Authorization");
         try {
-            new UserService().logout(authToken);
+            new UserService().logout(authToken, Server.authDAO);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
                 Error error = new Error(e.getMessage());

@@ -9,27 +9,28 @@ import model.GameData;
 
 import java.util.Collection;
 
+
 public class GameService {
-    public Collection<GameData> listGames(String authToken) throws DataAccessException {
-        new AuthMemoryAccess().getAuth(authToken);
-        return new GameMemoryAccess().listGames();
+    public Collection<GameData> listGames(String authToken, AuthMemoryAccess authDAO, GameMemoryAccess gameDAO) throws DataAccessException {
+        authDAO.getAuth(authToken);
+        return gameDAO.listGames();
     }
 
-    public int createGame(String authToken, String gameName) throws DataAccessException {
-        new AuthMemoryAccess().getAuth(authToken);
-        return new GameMemoryAccess().createGame(gameName);
+    public int createGame(String authToken, String gameName, AuthMemoryAccess authDAO, GameMemoryAccess gameDAO) throws DataAccessException {
+        authDAO.getAuth(authToken);
+        return gameDAO.createGame(gameName);
     }
 
-    public GameData joinGame(String authToken, String playerColor, int gameID) throws DataAccessException {
-        AuthData user = new AuthMemoryAccess().getAuth(authToken);
+    public GameData joinGame(String authToken, String playerColor, int gameID, AuthMemoryAccess authDAO, GameMemoryAccess gameDAO) throws DataAccessException {
+        AuthData user = authDAO.getAuth(authToken);
         String username = user.username();
-        GameData game = new GameMemoryAccess().getGame(gameID);
-        new GameMemoryAccess().checkPlayer(game, playerColor);
-        return new GameMemoryAccess().joinGame(game, gameID, playerColor, username);
+        GameData game = gameDAO.getGame(gameID);
+        gameDAO.checkPlayer(game, playerColor);
+        return gameDAO.joinGame(game, gameID, playerColor, username);
     }
-    public void clear() {
-       new GameMemoryAccess().clear();
-       new AuthMemoryAccess().clear();
-       new UserMemoryAccess().clear();
+    public void clear(UserMemoryAccess userDAO, GameMemoryAccess gameDAO, AuthMemoryAccess authDAO) {
+       gameDAO.clear();
+       authDAO.clear();
+       userDAO.clear();
     }
 }
