@@ -1,5 +1,6 @@
 package server;
 import dataAccess.DataAccessException;
+import model.Error;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 import service.UserService;
@@ -16,21 +17,24 @@ public class Register {
             authToken = new UserService().register(newUser);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.BAD_REQUEST)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(400);
                 res.body(body);
                 return body;
             }
             if (e.getMessage().equals(Constants.ALREADY_TAKEN)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(403);
                 res.body(body);
                 return body;
             }
             if (e.getMessage().equals(Constants.DESCRIPTION)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(500);
                 res.body(body);

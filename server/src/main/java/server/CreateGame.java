@@ -3,6 +3,7 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import model.Error;
 import model.GameData;
 import model.UserData;
 import service.GameService;
@@ -18,21 +19,24 @@ public class CreateGame {
             new GameService().createGame(authToken, gameName);
         } catch (DataAccessException e) {
             if (e.getMessage().equals(Constants.BAD_REQUEST)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(400);
                 res.body(body);
                 return body;
             }
             if (e.getMessage().equals(Constants.UNAUTHORIZED)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(401);
                 res.body(body);
                 return body;
             }
             if (e.getMessage().equals(Constants.DESCRIPTION)) {
-                var body = new Gson().toJson(e.getMessage());
+                Error error = new Error(e.getMessage());
+                var body = new Gson().toJson(error);
                 res.type("application/json");
                 res.status(500);
                 res.body(body);
@@ -43,6 +47,6 @@ public class CreateGame {
         res.type("application/json");
         res.status(200);
         res.body(body);
-        return body;
+        return "{}";
     }
 }
