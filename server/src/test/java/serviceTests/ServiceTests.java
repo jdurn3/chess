@@ -1,5 +1,6 @@
 package serviceTests;
 
+
 import chess.ChessGame;
 import dataAccess.AuthMemoryAccess;
 import dataAccess.DataAccessException;
