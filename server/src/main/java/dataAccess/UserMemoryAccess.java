@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class UserMemoryAccess {
-    final private HashMap<String, UserData> users = new HashMap<>();
+    private final HashMap<String, UserData> users = new HashMap<>();
 
     public void createUser(UserData user) {
         String username = user.username();

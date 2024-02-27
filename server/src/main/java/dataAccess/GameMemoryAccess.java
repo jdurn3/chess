@@ -51,11 +51,11 @@ public class GameMemoryAccess {
     }
 
     public GameData joinGame(GameData game, int gameID, ChessGame.TeamColor playerColor, String username) {
-        GameData new_game;
+        GameData new_game = game;
         if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             new_game = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
         }
-       else {
+       else if ((Objects.equals(playerColor, ChessGame.TeamColor.BLACK))) {
             new_game = new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game());
         }
         games.remove(gameID);
