@@ -154,7 +154,6 @@ public class ChessPiece {
             if (duplicate2(board, myPosition, validMoves, right)) break;
             right = new ChessPosition(myPosition.getRow(), right.getColumn()+1);
         }
-
         return validMoves;
 
     }
