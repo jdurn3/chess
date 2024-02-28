@@ -1,18 +1,15 @@
 package server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import model.*;
-import model.Error;
 import service.GameService;
-import service.UserService;
 import spark.Request;
 import spark.Response;
 
 public class CreateGame {
     public Object createGame(Request req, Response res) {
-        gameName newGameName = new Gson().fromJson(req.body(), gameName.class);
+        GameName newGameName = new Gson().fromJson(req.body(), GameName.class);
         String authToken = req.headers("Authorization");
         int gameID;
         try {

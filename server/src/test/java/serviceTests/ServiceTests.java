@@ -209,9 +209,9 @@ public class ServiceTests {
 
         int gameID = serverFacade.createGame(auth.authToken(), gameName, authDAO, gameDAO);
 
-        GameData new_game = serverFacade.joinGame(auth.authToken(), ChessGame.TeamColor.BLACK, gameID, authDAO, gameDAO);
+        GameData newGame = serverFacade.joinGame(auth.authToken(), ChessGame.TeamColor.BLACK, gameID, authDAO, gameDAO);
 
-        assertEquals(gameID, new_game.gameID());
+        assertEquals(gameID, newGame.gameID());
     }
     @Test
     public void negativeJoinGame() throws DataAccessException {

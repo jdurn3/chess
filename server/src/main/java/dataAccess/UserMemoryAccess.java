@@ -37,8 +37,8 @@ public class UserMemoryAccess {
             }
         }
 
-    public String checkPassword(String password, String given_password) throws DataAccessException {
-        if (Objects.equals(password, given_password)) {
+    public String checkPassword(String password, String givenPassword) throws DataAccessException {
+        if (Objects.equals(password, givenPassword)) {
             return password;
         }
         else {

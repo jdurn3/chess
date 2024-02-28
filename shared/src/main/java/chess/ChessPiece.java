@@ -241,35 +241,35 @@ public class ChessPiece {
 
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> validMoves = new HashSet<>();
-        ArrayList<ChessPosition> white_beginning = new ArrayList<>();
-        ArrayList<ChessPosition> black_beginning = new ArrayList<>();
-        ArrayList<ChessPosition> white_end = new ArrayList<>();
-        ArrayList<ChessPosition> black_end = new ArrayList<>();
+        ArrayList<ChessPosition> whiteBeginning = new ArrayList<>();
+        ArrayList<ChessPosition> blackBeginning = new ArrayList<>();
+        ArrayList<ChessPosition> whiteEnd = new ArrayList<>();
+        ArrayList<ChessPosition> blackEnd = new ArrayList<>();
 
 
         for (int i = 0; i < 8; i++) {
-            white_beginning.add(new ChessPosition(2, i));
-            black_beginning.add(new ChessPosition(7, i));
-            white_end.add(new ChessPosition(8, i));
-            black_end.add(new ChessPosition(1, i));
+            whiteBeginning.add(new ChessPosition(2, i));
+            blackBeginning.add(new ChessPosition(7, i));
+            whiteEnd.add(new ChessPosition(8, i));
+            blackEnd.add(new ChessPosition(1, i));
 
         }
 
         if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.WHITE) {
             ChessPosition rightDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1);
             ChessPosition leftDiagonal = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1);
-            ChessPosition move_one = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn());
+            ChessPosition moveOne = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn());
 
-            for (ChessPosition start : white_beginning) {
+            for (ChessPosition start : whiteBeginning) {
                 if (Objects.equals(start, myPosition)) {
-                    ChessPosition move_two = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
-                    if ((board.getPiece(move_two) == null) && (board.getPiece(move_one) == null)) {
-                        validMoves.add(new ChessMove(myPosition, move_two, null));
+                    ChessPosition moveTwo = new ChessPosition(myPosition.getRow()+2, myPosition.getColumn());
+                    if ((board.getPiece(moveTwo) == null) && (board.getPiece(moveOne) == null)) {
+                        validMoves.add(new ChessMove(myPosition, moveTwo, null));
                     }
                 }
             }
 
-            if (duplicate3(board, myPosition, validMoves, white_end, rightDiagonal, leftDiagonal, move_one))
+            if (duplicate3(board, myPosition, validMoves, whiteEnd, rightDiagonal, leftDiagonal, moveOne))
                 return validMoves;
 
             if (inbounds(rightDiagonal) && (board.getPiece(rightDiagonal) != null)) {
@@ -283,7 +283,7 @@ public class ChessPiece {
                 }
             }
 
-            if ((inbounds(move_one)) && (board.getPiece(move_one) == null)) {
+            if ((inbounds(moveOne)) && (board.getPiece(moveOne) == null)) {
                 validMoves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()), null));
 
             }
@@ -293,19 +293,19 @@ public class ChessPiece {
         if (board.getPiece(myPosition).getTeamColor() == ChessGame.TeamColor.BLACK) {
             ChessPosition rightDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1);
             ChessPosition leftDiagonal = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1);
-            ChessPosition move_one = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
+            ChessPosition moveOne = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn());
 
 
-            for (ChessPosition start : black_beginning) {
+            for (ChessPosition start : blackBeginning) {
                 if (Objects.equals(start, myPosition)) {
-                    ChessPosition move_two = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
-                    if ((board.getPiece(move_two) == null) && (board.getPiece(move_one) == null)) {
-                        validMoves.add(new ChessMove(myPosition, move_two, null));
+                    ChessPosition moveTwo = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                    if ((board.getPiece(moveTwo) == null) && (board.getPiece(moveOne) == null)) {
+                        validMoves.add(new ChessMove(myPosition, moveTwo, null));
                     }
                 }
             }
 
-            if (duplicate3(board, myPosition, validMoves, black_end, rightDiagonal, leftDiagonal, move_one))
+            if (duplicate3(board, myPosition, validMoves, blackEnd, rightDiagonal, leftDiagonal, moveOne))
                 return validMoves;
 
             if (inbounds(rightDiagonal) && (board.getPiece(rightDiagonal) != null)) {
@@ -319,39 +319,39 @@ public class ChessPiece {
                     validMoves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1), null));
                 }
             }
-            if ((inbounds(move_one)) && (board.getPiece(move_one) == null)) {
+            if ((inbounds(moveOne)) && (board.getPiece(moveOne) == null)) {
                 validMoves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()), null));
             }
         }
         return validMoves;
     }
 
-    private boolean duplicate3(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> validMoves, ArrayList<ChessPosition> black_end, ChessPosition rightDiagonal, ChessPosition leftDiagonal, ChessPosition move_one) {
-        boolean is_end = false;
-        for (ChessPosition end : black_end) {
-            if ((Objects.equals(end, move_one)) && (board.getPiece(move_one) == null)) {
+    private boolean duplicate3(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> validMoves, ArrayList<ChessPosition> blackEnd, ChessPosition rightDiagonal, ChessPosition leftDiagonal, ChessPosition moveOne) {
+        boolean isEnd = false;
+        for (ChessPosition end : blackEnd) {
+            if ((Objects.equals(end, moveOne)) && (board.getPiece(moveOne) == null)) {
                 validMoves.add(new ChessMove(myPosition, end, PieceType.QUEEN));
                 validMoves.add(new ChessMove(myPosition, end, PieceType.ROOK));
                 validMoves.add(new ChessMove(myPosition, end, PieceType.BISHOP));
                 validMoves.add(new ChessMove(myPosition, end, PieceType.KNIGHT));
-                is_end = true;
+                isEnd = true;
             }
             if ((Objects.equals(end, rightDiagonal)) && (inbounds(rightDiagonal)) && (board.getPiece(rightDiagonal) != null)) {
                 validMoves.add(new ChessMove(myPosition, rightDiagonal, PieceType.QUEEN));
                 validMoves.add(new ChessMove(myPosition, rightDiagonal, PieceType.ROOK));
                 validMoves.add(new ChessMove(myPosition, rightDiagonal, PieceType.BISHOP));
                 validMoves.add(new ChessMove(myPosition, rightDiagonal, PieceType.KNIGHT));
-                is_end = true;
+                isEnd = true;
             }
             if ((Objects.equals(end, leftDiagonal)) && (inbounds(leftDiagonal)) && (board.getPiece(leftDiagonal) != null)) {
                 validMoves.add(new ChessMove(myPosition, leftDiagonal, PieceType.QUEEN));
                 validMoves.add(new ChessMove(myPosition, leftDiagonal, PieceType.ROOK));
                 validMoves.add(new ChessMove(myPosition, leftDiagonal, PieceType.BISHOP));
                 validMoves.add(new ChessMove(myPosition, leftDiagonal, PieceType.KNIGHT));
-                is_end = true;
+                isEnd = true;
             }
         }
-        if (is_end) {
+        if (isEnd) {
             return true;
         }
         return false;
