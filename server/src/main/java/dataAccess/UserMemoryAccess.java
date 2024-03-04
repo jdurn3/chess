@@ -7,7 +7,7 @@ import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class UserMemoryAccess {
+public class UserMemoryAccess implements UserDAO{
     private final HashMap<String, UserData> users = new HashMap<>();
 
     public void createUser(UserData user) {

@@ -6,7 +6,7 @@ import server.Constants;
 import javax.xml.crypto.Data;
 import java.util.*;
 
-public class GameMemoryAccess {
+public class GameMemoryAccess implements GameDAO{
     private  int nextID = 0;
     final private HashMap<Integer, GameData> games = new HashMap<>();
 

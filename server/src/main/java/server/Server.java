@@ -2,6 +2,7 @@ package server;
 import com.google.gson.Gson;
 import dataAccess.AuthMemoryAccess;
 import dataAccess.GameMemoryAccess;
+import dataAccess.UserDAO;
 import dataAccess.UserMemoryAccess;
 import spark.*;
 
