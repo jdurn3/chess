@@ -1,17 +1,14 @@
 package server;
 import com.google.gson.Gson;
-import dataAccess.AuthMemoryAccess;
-import dataAccess.GameMemoryAccess;
-import dataAccess.UserDAO;
-import dataAccess.UserMemoryAccess;
+import dataAccess.*;
 import spark.*;
 
 import java.util.Map;
 
 public class Server {
-        static UserMemoryAccess userDAO = new UserMemoryAccess();
-        static GameMemoryAccess gameDAO = new GameMemoryAccess();
-        static AuthMemoryAccess authDAO = new AuthMemoryAccess();
+        static UserDAO userDAO = new SQLUserDAO();
+        static GameDAO gameDAO = new SQLGameDAO();
+        static AuthDAO authDAO = new SQLAuthDAO();
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
