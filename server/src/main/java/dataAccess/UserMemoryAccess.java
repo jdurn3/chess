@@ -28,28 +28,28 @@ public class UserMemoryAccess implements UserDAO{
         }
     }
 
-    public String checkUser(String username) throws DataAccessException {
+    public boolean checkUser(String username) throws DataAccessException {
             if (users.containsKey(username)) {
                 throw new DataAccessException(Constants.ALREADY_TAKEN);
             }
             else {
-                return username;
+                return false;
             }
         }
 
-    public String checkPassword(String password, String givenPassword) throws DataAccessException {
+    public boolean checkPassword(String password, String givenPassword) throws DataAccessException {
         if (Objects.equals(password, givenPassword)) {
-            return password;
+            return true;
         }
         else {
             throw new DataAccessException(Constants.UNAUTHORIZED);
         }
     }
 
-    public UserData validPassword(UserData user) throws DataAccessException {
+    public boolean validPassword(UserData user) throws DataAccessException {
         if (user.password() == null ) {
             throw new DataAccessException(Constants.BAD_REQUEST);
         }
-        return user;
+        return true;
     }
 }

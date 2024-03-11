@@ -6,16 +6,17 @@ import org.eclipse.jetty.server.Authentication;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.sql.*;
+import java.util.Objects;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class SQLUserDAO implements UserDAO {
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email, json) VALUES (?, ?, ?, ?)";
         var json = new Gson().toJson(user);
-        //var id = executeUpdate(statement, user.username(), user.password(), user.email(), json);
+        executeUpdate(statement, user.username(), user.password(), user.email(), json);
     }
 
     public SQLUserDAO() {
@@ -27,29 +28,93 @@ public class SQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void clear() {
-        //DROP TABLE user;
+    public void clear() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM user;";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to delete users: %s", e.getMessage()));
+        }
     }
 
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username,password, email FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
-    @Override
-    public String checkUser(String username) throws DataAccessException {
-        return null;
+    private UserData readUser(ResultSet rs) throws SQLException {
+        var username = rs.getString("username");
+        var password = rs.getString("password");
+        var email = rs.getString("email");
+        return new UserData(username, password, email);
     }
 
     @Override
-    public String checkPassword(String password, String givenPassword) throws DataAccessException {
-        return null;
+    public boolean checkUser(String username) throws DataAccessException {
+        boolean exists = false;
+
+        try (var conn = DatabaseManager.getConnection()) {
+            var query = "SELECT COUNT(*) FROM user WHERE username = ?";
+            try (var ps = conn.prepareStatement(query)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        exists = count > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to check username existence: %s", e.getMessage()));
+        }
+
+        return exists;
     }
 
     @Override
-    public UserData validPassword(UserData user) throws DataAccessException {
-        return null;
+    public boolean checkPassword(String password, String givenPassword) throws DataAccessException {
+        if (Objects.equals(password, givenPassword)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean validPassword(UserData user) throws DataAccessException {
+        boolean used = false;
+        String password = user.password();
+        try (var conn = DatabaseManager.getConnection()) {
+            var query = "SELECT COUNT(*) FROM user WHERE password = ?";
+            try (var ps = conn.prepareStatement(query)) {
+                ps.setString(1, password);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        used = count > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to check password usage: %s", e.getMessage()));
+        }
+
+        return used;
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -77,15 +142,12 @@ public class SQLUserDAO implements UserDAO {
     }
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  pet (
+            CREATE TABLE IF NOT EXISTS  user (
               `username` NOT NULL,
               `password` NOT NULL,
               `email` NOT NULL,
-              `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`username`),
-              INDEX(password),
-              INDEX(email)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            )
             """
     };
 

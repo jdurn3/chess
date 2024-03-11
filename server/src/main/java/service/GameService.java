@@ -26,7 +26,7 @@ public class GameService {
         gameDAO.checkPlayer(game, playerColor);
         return gameDAO.joinGame(game, gameID, playerColor, username);
     }
-    public void clear(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) {
+    public void clear(UserDAO userDAO, GameDAO gameDAO, AuthDAO authDAO) throws DataAccessException {
        gameDAO.clear();
        authDAO.clear();
        userDAO.clear();
