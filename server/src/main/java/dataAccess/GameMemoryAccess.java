@@ -34,7 +34,7 @@ public class GameMemoryAccess implements GameDAO{
         }
     }
 
-    public GameData checkPlayer(GameData game, ChessGame.TeamColor playerColor) throws DataAccessException {
+    public boolean checkPlayer(GameData game, ChessGame.TeamColor playerColor) throws DataAccessException {
         if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             String user = game.whiteUsername();
             if (user != null) {
@@ -47,10 +47,10 @@ public class GameMemoryAccess implements GameDAO{
                 throw new DataAccessException(Constants.ALREADY_TAKEN);
             }
         }
-        return game;
+        return true;
     }
 
-    public GameData joinGame(GameData game, int gameID, ChessGame.TeamColor playerColor, String username) {
+    public GameData joinGame(GameData game, int gameID, ChessGame.TeamColor playerColor, String username) throws DataAccessException {
         GameData newGame = game;
         if (Objects.equals(playerColor, ChessGame.TeamColor.WHITE)) {
             newGame = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());

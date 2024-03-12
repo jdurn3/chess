@@ -21,6 +21,9 @@ public class UserService {
     public AuthData login(UserData user, UserDAO userDAO, AuthDAO authDAO) throws DataAccessException {
         String username = user.username();
         UserData selectedUser = userDAO.getUser(username);
+        if (selectedUser == null) {
+            throw new DataAccessException(Constants.UNAUTHORIZED);
+        }
         if (userDAO.checkPassword(selectedUser.password(), user.password())) {
             return authDAO.createAuth(username);
         }
@@ -28,7 +31,9 @@ public class UserService {
     }
 
     public void logout(String authToken, AuthDAO authDAO) throws DataAccessException{
-        authDAO.getAuth(authToken);
+        if (authDAO.getAuth(authToken) == null) {
+            throw new DataAccessException(Constants.UNAUTHORIZED);
+        }
         authDAO.deleteAuth(authToken);
 
     }

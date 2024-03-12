@@ -15,8 +15,7 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public void createUser(UserData user) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email, json) VALUES (?, ?, ?, ?)";
-        var json = new Gson().toJson(user);
-        executeUpdate(statement, user.username(), user.password(), user.email(), json);
+        executeUpdate(statement, user.username(), user.password(), user.email());
     }
 
     public SQLUserDAO() {
