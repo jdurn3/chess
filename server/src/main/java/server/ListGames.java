@@ -16,6 +16,7 @@ public class ListGames {
         try {
             list = new GameService().listGames(authToken, Server.authDAO, Server.gameDAO).toArray();
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return Exceptions.giveException(e, res);
         }
         var body = new Gson().toJson(Map.of("games", list));

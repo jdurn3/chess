@@ -16,6 +16,7 @@ public class Register {
         try {
             authToken = new UserService().register(newUser, Server.userDAO, Server.authDAO);
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return Exceptions.giveException(e, res);
         }
         RegisterResponse response = new RegisterResponse(newUser.username(), authToken.authToken());

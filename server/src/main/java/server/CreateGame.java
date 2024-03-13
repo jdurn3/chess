@@ -15,6 +15,7 @@ public class CreateGame {
         try {
             gameID = new GameService().createGame(authToken, newGameName.gameName(), Server.authDAO, Server.gameDAO);
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return Exceptions.giveException(e, res);
         }
         var body = new Gson().toJson(new CreateResponse(gameID));

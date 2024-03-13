@@ -46,7 +46,7 @@ public class SQLGameDAO implements GameDAO{
     public Collection<GameData> listGames() throws DataAccessException {
         var result = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID FROM games";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -64,7 +64,7 @@ public class SQLGameDAO implements GameDAO{
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID FROM games WHERE gameID=?";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
