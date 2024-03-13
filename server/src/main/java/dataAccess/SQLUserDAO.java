@@ -142,9 +142,9 @@ public class SQLUserDAO implements UserDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
-              `username` NOT NULL,
-              `password` NOT NULL,
-              `email` NOT NULL,
+              `username` STRING NOT NULL,
+              `password` STRING NOT NULL,
+              `email` STRING NOT NULL,
               PRIMARY KEY (`username`),
             )
             """

@@ -1,6 +1,7 @@
 package dataAccess;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 
@@ -37,8 +38,11 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        var statement = "INSERT INTO games (gameName) VALUES (?)";
-        return executeUpdate(statement, gameName);
+        ChessGame game = new ChessGame();
+        game.getBoard().resetBoard();
+        String stored_game = new Gson().toJson(game);
+        var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
+        return executeUpdate(statement, gameName, stored_game);
     }
 
     @Override
@@ -121,8 +125,9 @@ public class SQLGameDAO implements GameDAO{
         var whiteUsername = rs.getString("whiteUsername");
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
-        var chessGame = rs.getString("game");
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, chessGame);
+        var json = rs.getString("game");
+        ChessGame game = new Gson().fromJson(json, ChessGame.class);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -155,7 +160,7 @@ public class SQLGameDAO implements GameDAO{
               `whiteUsername` STRING DEFAULT NULL,
               `blackUsername` STRING DEFAULT NULL,
               `gameName` STRING NOT NULL,
-              `game` ChessGame NOT NULL,
+              `game` TEXT NOT NULL,
               PRIMARY KEY (`gameID`),
             )
             """
