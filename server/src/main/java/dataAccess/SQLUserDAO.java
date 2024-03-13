@@ -88,10 +88,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public boolean checkPassword(String password, String givenPassword) throws DataAccessException {
-        if (Objects.equals(password, givenPassword)) {
-            return true;
-        }
-        return false;
+        return Objects.equals(password, givenPassword);
     }
 
     @Override
@@ -142,10 +139,10 @@ public class SQLUserDAO implements UserDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
-              `username` STRING NOT NULL,
-              `password` STRING NOT NULL,
-              `email` STRING NOT NULL,
-              PRIMARY KEY (`username`),
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
             )
             """
     };
