@@ -12,8 +12,8 @@ public class UserService {
         if (userDAO.checkUser(username)) {
             throw new DataAccessException(Constants.ALREADY_TAKEN);
         }
-        if (!userDAO.validPassword(user)) {
-            throw new DataAccessException(Constants.UNAUTHORIZED);
+        if (user.password() == null) {
+            throw new DataAccessException(Constants.BAD_REQUEST);
         }
         userDAO.createUser(user);
         return authDAO.createAuth(username);

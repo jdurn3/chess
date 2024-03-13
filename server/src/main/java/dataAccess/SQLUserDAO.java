@@ -14,7 +14,7 @@ import static java.sql.Types.NULL;
 public class SQLUserDAO implements UserDAO {
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO user (username, password, email, json) VALUES (?, ?, ?, ?)";
+        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         executeUpdate(statement, user.username(), user.password(), user.email());
     }
 
@@ -88,10 +88,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public boolean checkPassword(String password, String givenPassword) throws DataAccessException {
-        if (Objects.equals(password, givenPassword)) {
-            return true;
-        }
-        return false;
+        return Objects.equals(password, givenPassword);
     }
 
     @Override
@@ -142,10 +139,10 @@ public class SQLUserDAO implements UserDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
-              `username` STRING NOT NULL,
-              `password` STRING NOT NULL,
-              `email` STRING NOT NULL,
-              PRIMARY KEY (`username`),
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
             )
             """
     };

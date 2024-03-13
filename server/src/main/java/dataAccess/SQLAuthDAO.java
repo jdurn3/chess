@@ -31,7 +31,7 @@ public class SQLAuthDAO implements AuthDAO{
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT authToken FROM authTokens WHERE authToken=?";
+            var statement = "SELECT authToken, username FROM authTokens WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (var rs = ps.executeQuery()) {
@@ -96,9 +96,9 @@ public class SQLAuthDAO implements AuthDAO{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  authTokens (
-              `authToken` STRING NOT NULL,
-              `username` STRING NOT NULL,
-              PRIMARY KEY (`authToken`),
+              `authToken` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              PRIMARY KEY (`authToken`)
             )
             """
     };

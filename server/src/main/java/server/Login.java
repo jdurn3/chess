@@ -18,6 +18,7 @@ public class Login {
         try {
             authToken = new UserService().login(newUser, Server.userDAO, Server.authDAO);
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return Exceptions.giveException(e, res);
         }
         var body = new Gson().toJson(new RegisterResponse(authToken.username(), authToken.authToken()));
