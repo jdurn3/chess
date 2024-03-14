@@ -8,5 +8,4 @@ public interface UserDAO {
     UserData getUser(String username) throws DataAccessException;
     boolean checkUser(String username) throws DataAccessException;
     boolean checkPassword(String password, String givenPassword) throws DataAccessException;
-    boolean validPassword(UserData user) throws DataAccessException;
 }
