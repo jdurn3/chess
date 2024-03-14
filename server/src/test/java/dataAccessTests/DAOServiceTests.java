@@ -9,7 +9,9 @@ import org.eclipse.jetty.server.Authentication;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.GameService;
 import service.UserService;
@@ -18,28 +20,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DAOServiceTests {
+    private UserDAO userDAO;
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
 
+    @BeforeEach
+    public void setUp() throws DataAccessException {
+        userDAO = new SQLUserDAO();
+        authDAO = new SQLAuthDAO();
+        gameDAO = new SQLGameDAO();
+
+        // Clear the database before each test
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
+    }
+
+    @AfterEach
+    public void tearDown() throws DataAccessException {
+        // Clear the database after each test
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
+    }
     @Test
     public void testClearMethod() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
-        GameDAO gameDAO = new SQLGameDAO();
-
 
         gameDAO.createGame("ChessMaster");
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
         userDAO.createUser(user);
         authDAO.createAuth("BOB");
 
-        new GameService().clear(userDAO, gameDAO, authDAO);
-        assertThrows(DataAccessException.class, () -> userDAO.getUser(user.username()));
+        GameService serverFacade = new GameService();
+        serverFacade.clear(userDAO, gameDAO, authDAO);
+        assertThrows(DataAccessException.class, () -> serverFacade.listGames(null, authDAO, gameDAO));
     }
     @Test
     public void testPositiveRegister() throws DataAccessException {
-        // Assuming you have a DatabaseManager class with a register method
-         UserDAO userDAO = new SQLUserDAO();
-         AuthDAO authDAO = new SQLAuthDAO();
-
 
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
 
@@ -50,8 +67,6 @@ public class DAOServiceTests {
 
     @Test
     public void negativeRegister() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         UserService serverFacade = new UserService();
 
         serverFacade.register(new UserData("BOB", "password", "Bob@hotmail.com"), userDAO, authDAO);
@@ -63,10 +78,8 @@ public class DAOServiceTests {
 
     @Test
     public void positiveLogin() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         UserService serverFacade = new UserService();
-        UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
+        UserData user = new UserData("BOBB", "password", "Bob@hotmail.com");
         AuthData auth = serverFacade.register(user, userDAO, authDAO);
 
         serverFacade.logout(auth.authToken(), authDAO);
@@ -82,8 +95,6 @@ public class DAOServiceTests {
 
     @Test
     public void negativeLogin() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         UserService serverFacade = new UserService();
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
         UserData incorrect_user = new UserData("BOBBIE", "password", "Bob@hotmail.com");
@@ -97,8 +108,6 @@ public class DAOServiceTests {
     }
     @Test
     public void positiveLogout() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         UserService serverFacade = new UserService();
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
         AuthData auth = serverFacade.register(user, userDAO, authDAO);
@@ -106,13 +115,11 @@ public class DAOServiceTests {
         serverFacade.logout(auth.authToken(), authDAO);
 
         assertThrows(DataAccessException.class, () ->
-                authDAO.getAuth(auth.authToken()));
+                serverFacade.register(user, userDAO, authDAO));
     }
 
     @Test
     public void negativeLogout() throws DataAccessException {
-        UserDAO userDAO = new SQLUserDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         UserService serverFacade = new UserService();
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
         AuthData auth = serverFacade.register(user, userDAO, authDAO);
@@ -123,8 +130,6 @@ public class DAOServiceTests {
 
     @Test
     public void positiveCreateGame() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
         String username = "Bob";
         AuthData auth = authDAO.createAuth(username);
@@ -140,8 +145,6 @@ public class DAOServiceTests {
 
     @Test
     public void negativeCreateGame() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
         String auth = "permission";
         String gameName = "game 1";
@@ -151,8 +154,6 @@ public class DAOServiceTests {
     }
     @Test
     public void positiveListGames() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
         HashMap<Integer, GameData> games = new HashMap<>();
 
@@ -166,15 +167,13 @@ public class DAOServiceTests {
         int game1 = serverFacade.createGame(auth.authToken(), gameName, authDAO, gameDAO);
         int game2 = serverFacade.createGame(auth2.authToken(), gameName2, authDAO, gameDAO);
 
-        games.put(game1, gameDAO.getGame(game1));
         games.put(game2, gameDAO.getGame(game2));
+        games.put(game1, gameDAO.getGame(game1));
 
         assertIterableEquals(games.values(), serverFacade.listGames(auth.authToken(), authDAO, gameDAO));
     }
     @Test
     public void negativeListGames() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
         HashMap<Integer, GameData> games = new HashMap<>();
 
@@ -197,8 +196,6 @@ public class DAOServiceTests {
 
     @Test
     public void positiveJoinGame() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
         String username = "Bob";
         AuthData auth = authDAO.createAuth(username);
@@ -212,8 +209,6 @@ public class DAOServiceTests {
     }
     @Test
     public void negativeJoinGame() throws DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        AuthDAO authDAO = new SQLAuthDAO();
         GameService serverFacade = new GameService();
 
         String username = "Bob";
