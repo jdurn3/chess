@@ -43,6 +43,7 @@ public class DAOServiceTests {
         authDAO.clear();
         gameDAO.clear();
     }
+
     @Test
     public void testClearMethod() throws DataAccessException {
 
@@ -55,6 +56,7 @@ public class DAOServiceTests {
         serverFacade.clear(userDAO, gameDAO, authDAO);
         assertThrows(DataAccessException.class, () -> serverFacade.listGames(null, authDAO, gameDAO));
     }
+
     @Test
     public void testPositiveRegister() throws DataAccessException {
 
@@ -106,6 +108,7 @@ public class DAOServiceTests {
         assertThrows(DataAccessException.class, () ->
                 serverFacade.login(incorrect_user, userDAO, authDAO));
     }
+
     @Test
     public void positiveLogout() throws DataAccessException {
         UserService serverFacade = new UserService();
@@ -152,6 +155,7 @@ public class DAOServiceTests {
         assertThrows(DataAccessException.class, () ->
                 serverFacade.createGame(auth, gameName, authDAO, gameDAO));
     }
+
     @Test
     public void positiveListGames() throws DataAccessException {
         GameService serverFacade = new GameService();
@@ -172,6 +176,7 @@ public class DAOServiceTests {
 
         assertIterableEquals(games.values(), serverFacade.listGames(auth.authToken(), authDAO, gameDAO));
     }
+
     @Test
     public void negativeListGames() throws DataAccessException {
         GameService serverFacade = new GameService();
@@ -207,6 +212,7 @@ public class DAOServiceTests {
 
         assertEquals(gameID, newGame.gameID());
     }
+
     @Test
     public void negativeJoinGame() throws DataAccessException {
         GameService serverFacade = new GameService();
@@ -264,6 +270,7 @@ public class DAOServiceTests {
         assertEquals(user, userDAO.getUser(user.username()));
 
     }
+
     @Test
     public void positiveCheckUser() throws DataAccessException {
         UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
@@ -281,4 +288,6 @@ public class DAOServiceTests {
         new UserService().register(user, userDAO, authDAO);
 
         assertEquals(user, userDAO.getUser(user.username()));
+    }
+
 }
