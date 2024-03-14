@@ -91,28 +91,6 @@ public class SQLUserDAO implements UserDAO {
         return Objects.equals(password, givenPassword);
     }
 
-    @Override
-    public boolean validPassword(UserData user) throws DataAccessException {
-        boolean used = false;
-        String password = user.password();
-        try (var conn = DatabaseManager.getConnection()) {
-            var query = "SELECT COUNT(*) FROM user WHERE password = ?";
-            try (var ps = conn.prepareStatement(query)) {
-                ps.setString(1, password);
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        int count = rs.getInt(1);
-                        used = count > 0;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to check password usage: %s", e.getMessage()));
-        }
-
-        return used;
-    }
-
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
