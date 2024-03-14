@@ -264,4 +264,21 @@ public class DAOServiceTests {
         assertEquals(user, userDAO.getUser(user.username()));
 
     }
+    @Test
+    public void positiveCheckUser() throws DataAccessException {
+        UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
+
+        new UserService().register(user, userDAO, authDAO);
+
+        assertEquals(user, userDAO.getUser(user.username()));
+
+    }
+
+    @Test
+    public void negativeCheckUser() throws DataAccessException {
+        UserData user = new UserData("BOB", "password", "Bob@hotmail.com");
+
+        new UserService().register(user, userDAO, authDAO);
+
+        assertEquals(user, userDAO.getUser(user.username()));
 }
