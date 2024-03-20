@@ -12,7 +12,6 @@ public class PostLoginRepl {
     private final ServerFacade server;
     private final String serverUrl;
     private String userName;
-    private State state = State.SIGNEDIN;
 
     public PostLoginRepl(ServerFacade server, String serverUrl, String userName) {
         this.server = server;
@@ -29,7 +28,8 @@ public class PostLoginRepl {
         do {
             printPrompt();
             inputCommand = scanner.nextLine().trim().toLowerCase();
-            processCommand(inputCommand);
+            String result = processCommand(inputCommand);
+            System.out.println(result);
         } while (!inputCommand.equals("quit"));
     }
 
@@ -102,9 +102,8 @@ public class PostLoginRepl {
 
     private String logout() throws DataAccessException {
         server.logout();
-        state = State.SIGNEDOUT;
         userName = null;
-        new PreLoginRepl(serverUrl);
+        new PreLoginRepl(serverUrl).run();
         return "You have been logged out.";
     }
 

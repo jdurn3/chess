@@ -11,14 +11,13 @@ public class PreLoginRepl {
     private final ServerFacade server;
     private final String serverUrl;
     private String userName = null;
-    private State state = State.SIGNEDOUT;
 
     public PreLoginRepl(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
     }
     public void run() {
-        System.out.println("\uD83D\uDC36 Welcome to the Chess Client. Sign in or register to start.");
+        System.out.println("\uD83D\uDC36 Welcome to Chess 240. Sign in or register to start.");
         System.out.print(displayHelp());
 
         Scanner scanner = new Scanner(System.in);
@@ -26,7 +25,8 @@ public class PreLoginRepl {
         do {
             printPrompt();
             inputCommand = scanner.nextLine().trim().toLowerCase();
-            processCommand(inputCommand);
+            String result = processCommand(inputCommand);
+            System.out.println(result);
         } while (!inputCommand.equals("quit"));
     }
 
@@ -47,12 +47,6 @@ public class PreLoginRepl {
         }
 
     private String displayHelp() {
-        if (state == State.SIGNEDOUT) {
-            return """
-                    - signIn <USERNAME>
-                    - quit
-                    """;
-        }
         return """
                 Available commands:
                 - register <USERNAME> <PASSWORD> <EMAIL>
@@ -63,21 +57,19 @@ public class PreLoginRepl {
     }
     private String register(String...params) throws DataAccessException {
         if (params.length >= 3) {
-            state = State.SIGNEDIN;
             userName = params[0];
             UserData user = new UserData(params[0], params[1], params[2]);
             server.register(user);
-            new PostLoginRepl(server, serverUrl, userName);
+            new PostLoginRepl(server, serverUrl, userName).run();
             return String.format("You registered as %s.", userName);
         }
         throw new DataAccessException("Expected: <username> <password> <email>");
     }
     private String login(String... params) throws DataAccessException {
         if (params.length >= 2) {
-            state = State.SIGNEDIN;
             userName = params[0];
             server.login(userName, params[1]);
-            new PostLoginRepl(server, serverUrl, userName);
+            new PostLoginRepl(server, serverUrl, userName).run();
             return String.format("You signed in as %s.", userName);
         }
         throw new DataAccessException("Expected: <username> <password>");
