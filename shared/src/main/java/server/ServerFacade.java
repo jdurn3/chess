@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import model.GameData;
 import model.UserData;
 
 import java.io.*;
@@ -16,27 +17,38 @@ public class ServerFacade {
     }
 
 
-    public UserData register(UserData user) throws DataAccessException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, user, UserData.class);
+    public void register(UserData user) throws DataAccessException {
+        var path = "/user";
+        this.makeRequest("POST", path, user, UserData.class);
     }
 
-    public void deletePet(int id) throws DataAccessException {
-        var path = String.format("/pet/%s", id);
+    public void login(String username, String password) throws DataAccessException {
+        var path = "/session";
+        var requestBody = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+        this.makeRequest("POST", path, requestBody, UserData.class);
+    }
+    public void logout() throws DataAccessException {
+        var path = "/session";
         this.makeRequest("DELETE", path, null, null);
     }
-
-    public void deleteAllPets() throws DataAccessException {
-        var path = "/pet";
-        this.makeRequest("DELETE", path, null, null);
+    public void createGame(String gameName) throws DataAccessException {
+        var path = "/game";
+        String requestBody = "{ \"gameName\": \"" + gameName + "\" }";
+        this.makeRequest("POST", path, requestBody, GameData.class);
     }
 
-    public Pet[] listPets() throws DataAccessException {
-        var path = "/pet";
-        record listPetResponse(Pet[] pet) {
+    public GameData[] listGames() throws DataAccessException {
+        var path = "/game";
+        record listGameResponse(GameData[] games) {
         }
-        var response = this.makeRequest("GET", path, null, listPetResponse.class);
-        return response.pet();
+        var response = this.makeRequest("GET", path, null, listGameResponse.class);
+        return response.games();
+    }
+
+    public void joinGame(String gameID, String teamColor) throws DataAccessException {
+        var path = "/game";
+        String requestBody = "{ \"playerColor\": \"" + teamColor + "\", \"gameID\": \"" + gameID + "\" }";
+        this.makeRequest("PUT", path, requestBody, null);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws DataAccessException {
@@ -51,7 +63,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
-            throw new DataAccessException(500, ex.getMessage());
+            throw new DataAccessException(ex.getMessage());
         }
     }
 
@@ -69,7 +81,7 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, DataAccessException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new DataAccessException(status, "failure: " + status);
+            throw new DataAccessException("failure: " + status);
         }
     }
 
