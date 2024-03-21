@@ -3,10 +3,7 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
-import model.GameData;
-import model.GameName;
-import model.Join;
-import model.UserData;
+import model.*;
 
 import java.io.*;
 import java.net.*;
@@ -14,6 +11,7 @@ import java.net.*;
 public class ServerFacade {
 
     private final String serverUrl;
+    private String authToken;
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -22,43 +20,46 @@ public class ServerFacade {
 
     public void register(UserData user) throws DataAccessException {
         var path = "/user";
-        this.makeRequest("POST", path, user, UserData.class);
+        var response =  this.makeRequest("POST", path, user, RegisterResponse.class, null);
+        authToken = response.authToken();
     }
 
     public void login(String username, String password) throws DataAccessException {
         var path = "/session";
         var requestBody = new UserData(username, password, null);
-        this.makeRequest("POST", path, requestBody, UserData.class);
+        var response = this.makeRequest("POST", path, requestBody, RegisterResponse.class, null);
+        authToken = response.authToken();
     }
     public void logout() throws DataAccessException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, null);
+        this.makeRequest("DELETE", path, null, null, authToken);
     }
     public void createGame(String gameName) throws DataAccessException {
         var path = "/game";
         GameName requestBody = new GameName(gameName);
-        this.makeRequest("POST", path, requestBody, GameData.class);
+        this.makeRequest("POST", path, requestBody, GameData.class, authToken);
     }
 
     public GameData[] listGames() throws DataAccessException {
         var path = "/game";
         record listGameResponse(GameData[] games) {
         }
-        var response = this.makeRequest("GET", path, null, listGameResponse.class);
+        var response = this.makeRequest("GET", path, null, listGameResponse.class, authToken);
         return response.games();
     }
 
     public void joinGame(int gameID, ChessGame.TeamColor teamColor) throws DataAccessException {
         var path = "/game";
         Join requestBody = new Join(teamColor, gameID);
-        this.makeRequest("PUT", path, requestBody, null);
+        this.makeRequest("PUT", path, requestBody, null, authToken);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws DataAccessException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws DataAccessException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
+            http.addRequestProperty("Authorization", authToken);
             http.setDoOutput(true);
 
             writeBody(request, http);

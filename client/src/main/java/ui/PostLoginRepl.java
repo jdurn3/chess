@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import model.GameData;
 import model.UserData;
 import server.ServerFacade;
 
@@ -59,7 +60,7 @@ public class PostLoginRepl {
                 - create <NAME> : create a game
                 - list : list games
                 - join <ID> [WHITE|BLACK|<empty>] : join a game
-                - observe <ID> : observe a game
+                - observe <ID> null: observe a game
                 - logout : logout when done
                 - quit
                 - help
@@ -76,9 +77,13 @@ public class PostLoginRepl {
     private String listGames() throws DataAccessException {
         var games = server.listGames();
         var result = new StringBuilder();
-        var gson = new Gson();
-        for (var game : games) {
-            result.append(gson.toJson(game)).append('\n');
+        for (int i = 0; i < games.length; i++) {
+            GameData game = games[i];
+            result.append(i + 1).append(". GameID: ").append(game.gameID())
+                    .append(", White Player: ").append(game.whiteUsername())
+                    .append(", Black Player: ").append(game.blackUsername())
+                    .append(", Game Name: ").append(game.gameName())
+                    .append('\n');
         }
         return result.toString();
     }
@@ -99,15 +104,17 @@ public class PostLoginRepl {
             GameRepl.main(game);
             return String.format("You successfully joined :  %s.", gameID);
         }
-        throw new DataAccessException("Expected: <Game ID>");
+        throw new DataAccessException("Expected: <Game ID> [WHITE|BLACK|<empty>]");
     }
     private String observe(String... params) throws DataAccessException {
         if (params.length >= 2) {
             int gameID = Integer.parseInt(params[0]);
             server.joinGame(gameID, null);
+            String[] game = new String[8];
+            GameRepl.main(game);
             return String.format("You are observing game :  %s.", gameID);
         }
-        throw new DataAccessException("Expected: <Game ID>");
+        throw new DataAccessException("Expected: <Game ID> null");
     }
 
     private String logout() throws DataAccessException {
