@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.UserData;
@@ -83,17 +84,26 @@ public class PostLoginRepl {
     }
     private String joinGame(String... params) throws DataAccessException {
         if (params.length >= 2) {
-            String gameID = params[0];
+            int gameID = Integer.parseInt(params[0]);
             String teamColor = params[1];
-            server.joinGame(gameID, teamColor);
-            new GameRepl();
+            ChessGame.TeamColor parsedColor;
+            if (teamColor.equals("WHITE")) {
+                parsedColor = ChessGame.TeamColor.WHITE;
+            } else if (teamColor.equals("BLACK")) {
+                parsedColor = ChessGame.TeamColor.BLACK;
+            } else {
+                parsedColor = null;
+            }
+            server.joinGame(gameID, parsedColor);
+            String[] game = new String[8];
+            GameRepl.main(game);
             return String.format("You successfully joined :  %s.", gameID);
         }
         throw new DataAccessException("Expected: <Game ID>");
     }
     private String observe(String... params) throws DataAccessException {
         if (params.length >= 2) {
-            String gameID = params[0];
+            int gameID = Integer.parseInt(params[0]);
             server.joinGame(gameID, null);
             return String.format("You are observing game :  %s.", gameID);
         }

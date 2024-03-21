@@ -1,8 +1,11 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.GameData;
+import model.GameName;
+import model.Join;
 import model.UserData;
 
 import java.io.*;
@@ -24,7 +27,7 @@ public class ServerFacade {
 
     public void login(String username, String password) throws DataAccessException {
         var path = "/session";
-        var requestBody = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+        var requestBody = new UserData(username, password, null);
         this.makeRequest("POST", path, requestBody, UserData.class);
     }
     public void logout() throws DataAccessException {
@@ -33,7 +36,7 @@ public class ServerFacade {
     }
     public void createGame(String gameName) throws DataAccessException {
         var path = "/game";
-        String requestBody = "{ \"gameName\": \"" + gameName + "\" }";
+        GameName requestBody = new GameName(gameName);
         this.makeRequest("POST", path, requestBody, GameData.class);
     }
 
@@ -45,9 +48,9 @@ public class ServerFacade {
         return response.games();
     }
 
-    public void joinGame(String gameID, String teamColor) throws DataAccessException {
+    public void joinGame(int gameID, ChessGame.TeamColor teamColor) throws DataAccessException {
         var path = "/game";
-        String requestBody = "{ \"playerColor\": \"" + teamColor + "\", \"gameID\": \"" + gameID + "\" }";
+        Join requestBody = new Join(teamColor, gameID);
         this.makeRequest("PUT", path, requestBody, null);
     }
 
