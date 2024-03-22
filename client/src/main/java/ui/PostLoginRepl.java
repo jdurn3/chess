@@ -92,9 +92,9 @@ public class PostLoginRepl {
             int gameID = Integer.parseInt(params[0]);
             String teamColor = params[1];
             ChessGame.TeamColor parsedColor;
-            if (teamColor.equals("WHITE")) {
+            if (teamColor.equals("white")) {
                 parsedColor = ChessGame.TeamColor.WHITE;
-            } else if (teamColor.equals("BLACK")) {
+            } else if (teamColor.equals("black")) {
                 parsedColor = ChessGame.TeamColor.BLACK;
             } else {
                 parsedColor = null;
@@ -121,7 +121,7 @@ public class PostLoginRepl {
         server.logout();
         userName = null;
         new PreLoginRepl(serverUrl).run();
-        return "You have been logged out.";
+        return "";
     }
 
     private void printPrompt() {

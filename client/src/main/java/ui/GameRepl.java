@@ -46,9 +46,9 @@ public class GameRepl {
     // Function to print the board in regular orientation
     public static void printBoard(String[][] board) {
         boolean isWhiteSquare = true;
-        System.out.println("  1  2  3  4  5  6  7  8");
+        System.out.println("  A  B  C  D  E  F  G  H");
         for (int i = 0; i < 8; i++) {
-            System.out.print((i + 1) + " ");
+            System.out.print((char) ('1' + i) + " ");
             for (int j = 0; j < 8; j++) {
                 if (isWhiteSquare) {
                     System.out.print("\u001B[47m"); // White background
@@ -72,9 +72,9 @@ public class GameRepl {
     // Function to print the board in reverse orientation
     public static void printBoardReverse(String[][] board) {
         boolean isWhiteSquare = true;
-        System.out.println("  8  7  6  5  4  3  2  1");
+        System.out.println("  H  G  F  E  D  C  B  A");
         for (int i = 7; i >= 0; i--) {
-            System.out.print((8 - i) + " ");
+            System.out.print((char) ('1' + i) + " ");
             for (int j = 7; j >= 0; j--) {
                 if (isWhiteSquare) {
                     System.out.print("\u001B[47m"); // White background

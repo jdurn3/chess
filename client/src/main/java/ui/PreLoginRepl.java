@@ -61,7 +61,7 @@ public class PreLoginRepl {
             UserData user = new UserData(params[0], params[1], params[2]);
             server.register(user);
             new PostLoginRepl(server, serverUrl, userName).run();
-            return String.format("You registered as %s.", userName);
+            return "";
         }
         throw new DataAccessException("Expected: <username> <password> <email>");
     }
@@ -70,7 +70,7 @@ public class PreLoginRepl {
             userName = params[0];
             server.login(userName, params[1]);
             new PostLoginRepl(server, serverUrl, userName).run();
-            return String.format("You signed in as %s.", userName);
+            return "";
         }
         throw new DataAccessException("Expected: <username> <password>");
     }
