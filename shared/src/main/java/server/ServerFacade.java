@@ -17,6 +17,10 @@ public class ServerFacade {
         serverUrl = url;
     }
 
+    public void clear() throws DataAccessException {
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, null, null);
+    }
 
     public void register(UserData user) throws DataAccessException {
         var path = "/user";
@@ -34,10 +38,10 @@ public class ServerFacade {
         var path = "/session";
         this.makeRequest("DELETE", path, null, null, authToken);
     }
-    public void createGame(String gameName) throws DataAccessException {
+    public GameData createGame(String gameName) throws DataAccessException {
         var path = "/game";
         GameName requestBody = new GameName(gameName);
-        this.makeRequest("POST", path, requestBody, GameData.class, authToken);
+        return this.makeRequest("POST", path, requestBody, GameData.class, authToken);
     }
 
     public GameData[] listGames() throws DataAccessException {

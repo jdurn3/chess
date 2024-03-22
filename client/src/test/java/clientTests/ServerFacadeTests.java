@@ -22,12 +22,20 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade(port);
+        String url = "http://localhost:" + port;
+        facade = new ServerFacade(url);
     }
 
     @AfterAll
     static void stopServer() {
         server.stop();
+    }
+
+    @BeforeEach
+    void clearServerState() throws DataAccessException {
+        // Method to clear the server state
+        facade.clear();
+
     }
 
 
@@ -41,28 +49,75 @@ public class ServerFacadeTests {
         // Testing with null user object
         assertThrows(DataAccessException.class, () -> facade.register(null));
     }
+    @Test
+    public void testLoginPositive() throws DataAccessException {
+        // Positive login test
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
+        assertDoesNotThrow(() -> facade.login("John", "Doe"));
+    }
 
     @Test
-    public void testLogoutPositive() {
+    public void testLoginNegative() throws DataAccessException {
+        // Negative login test with invalid credentials
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
+        assertThrows(DataAccessException.class, () -> facade.login("invalidUsername", "invalidPassword"));
+    }
+
+    @Test
+    public void testLogoutPositive() throws DataAccessException {
         // Positive logout test
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
         assertDoesNotThrow(facade::logout);
     }
 
     @Test
-    public void testCreateGamePositive() {
+    public void testCreateGamePositive() throws DataAccessException {
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
         assertDoesNotThrow(() -> facade.createGame("TestGame"));
     }
 
     @Test
-    public void testListGamesPositive() {
+    public void testListGamesPositive() throws DataAccessException {
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
         assertDoesNotThrow(facade::listGames);
     }
 
     @Test
-    public void testJoinGamePositive() {
-        assertDoesNotThrow(() -> facade.joinGame(123, ChessGame.TeamColor.WHITE));
+    public void testJoinGamePositive() throws DataAccessException {
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
+        GameData game = facade.createGame("TestGame");
+        assertDoesNotThrow(() -> facade.joinGame(game.gameID(), ChessGame.TeamColor.WHITE));
 
     }
+    @Test
+    public void testLogoutNegative() throws DataAccessException {
+        assertThrows(DataAccessException.class, facade::logout);
+    }
 
+    @Test
+    public void testCreateGameNegative() throws DataAccessException {
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
+        assertThrows(DataAccessException.class, () -> facade.createGame(null));
+    }
+
+    @Test
+    public void testListGamesNegativeWithoutLogin() throws DataAccessException {
+        assertThrows(DataAccessException.class, facade::listGames);
+    }
+
+    @Test
+    public void testJoinGameNegative() throws DataAccessException {
+        UserData user = new UserData("John", "Doe", "john.doe@example.com");
+        facade.register(user);
+        GameData game = facade.createGame("TestGame");
+        assertThrows(DataAccessException.class, () -> facade.joinGame(123, ChessGame.TeamColor.WHITE));
+    }
 
 }
