@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServerFacadeTests {
 
+
     private static Server server;
     static ServerFacade facade;
 
