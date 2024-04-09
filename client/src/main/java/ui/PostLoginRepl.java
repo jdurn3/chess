@@ -1,19 +1,25 @@
 package ui;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.GameData;
-import model.UserData;
-import server.ServerFacade;
+import ui.connections.NotificationHandler;
+import ui.connections.ServerFacade;
+import ui.connections.WebSocketFacade;
+import webSocketMessages.serverMessages.ServerMessage;
+
 
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class PostLoginRepl {
+public class PostLoginRepl implements NotificationHandler {
     private final ServerFacade server;
     private final String serverUrl;
     private String userName;
+
+
+    private final NotificationHandler notificationHandler = this;
+
 
     public PostLoginRepl(ServerFacade server, String serverUrl, String userName) {
         this.server = server;
@@ -66,6 +72,11 @@ public class PostLoginRepl {
                 - help
                 """;
     }
+
+    public void notify(ServerMessage serverMessage) {
+        //System.out.println(serverMessage.message());
+        printPrompt();
+    }
     private String createGame(String... params) throws DataAccessException {
         if (params.length >= 1) {
             String gameName = params[0];
@@ -100,8 +111,9 @@ public class PostLoginRepl {
                 parsedColor = null;
             }
             server.joinGame(gameID, parsedColor);
-            String[] game = new String[8];
-            GameRepl.main(game);
+            WebSocketFacade ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.joinGame(gameID, parsedColor);
+            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID).run();
             return String.format("You successfully joined :  %s.", gameID);
         }
         throw new DataAccessException("Expected: <Game ID> [WHITE|BLACK|<empty>]");
@@ -110,8 +122,9 @@ public class PostLoginRepl {
         if (params.length >= 2) {
             int gameID = Integer.parseInt(params[0]);
             server.joinGame(gameID, null);
-            String[] game = new String[8];
-            GameRepl.main(game);
+            WebSocketFacade ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.observeGame(gameID);
+            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID).run();
             return String.format("You are observing game :  %s.", gameID);
         }
         throw new DataAccessException("Expected: <Game ID> null");

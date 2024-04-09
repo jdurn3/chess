@@ -1,18 +1,25 @@
 package server;
 import com.google.gson.Gson;
 import dataAccess.*;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import server.webSocket.WebSocketHandler;
 import spark.*;
 
 import java.util.Map;
 
 public class Server {
-        static UserDAO userDAO = new SQLUserDAO();
-        static GameDAO gameDAO = new SQLGameDAO();
-        static AuthDAO authDAO = new SQLAuthDAO();
+    public static UserDAO userDAO = new SQLUserDAO();
+    public static GameDAO gameDAO = new SQLGameDAO();
+    public static AuthDAO authDAO = new SQLAuthDAO();
+
+    private final WebSocketHandler webSocketHandler = new WebSocketHandler();
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", (request, response) -> new Clear().clear(request, response));

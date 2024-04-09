@@ -1,9 +1,11 @@
-package server;
+package ui.connections;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.*;
+import ui.PostLoginRepl;
+import ui.PreLoginRepl;
 
 import java.io.*;
 import java.net.*;
@@ -11,7 +13,6 @@ import java.net.*;
 public class ServerFacade {
 
     private final String serverUrl;
-    private String authToken;
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -25,37 +26,38 @@ public class ServerFacade {
     public void register(UserData user) throws DataAccessException {
         var path = "/user";
         var response =  this.makeRequest("POST", path, user, RegisterResponse.class, null);
-        authToken = response.authToken();
+        PreLoginRepl.authToken = response.authToken();
     }
 
     public void login(String username, String password) throws DataAccessException {
         var path = "/session";
         var requestBody = new UserData(username, password, null);
         var response = this.makeRequest("POST", path, requestBody, RegisterResponse.class, null);
-        authToken = response.authToken();
+        PreLoginRepl.authToken = response.authToken();
     }
     public void logout() throws DataAccessException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, null, authToken);
+        this.makeRequest("DELETE", path, null, null, PreLoginRepl.authToken);
     }
     public GameData createGame(String gameName) throws DataAccessException {
         var path = "/game";
         GameName requestBody = new GameName(gameName);
-        return this.makeRequest("POST", path, requestBody, GameData.class, authToken);
+        return this.makeRequest("POST", path, requestBody, GameData.class, PreLoginRepl.authToken);
     }
 
     public GameData[] listGames() throws DataAccessException {
         var path = "/game";
         record listGameResponse(GameData[] games) {
         }
-        var response = this.makeRequest("GET", path, null, listGameResponse.class, authToken);
+        var response = this.makeRequest("GET", path, null, listGameResponse.class, PreLoginRepl.authToken);
         return response.games();
     }
 
     public void joinGame(int gameID, ChessGame.TeamColor teamColor) throws DataAccessException {
         var path = "/game";
         Join requestBody = new Join(teamColor, gameID);
-        this.makeRequest("PUT", path, requestBody, null, authToken);
+        this.makeRequest("PUT", path, requestBody, null, PreLoginRepl.authToken);
+        //client.websocket.WebSocketFacade ws = new client.websocket.WebSocketFacade(serverUrl);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws DataAccessException {

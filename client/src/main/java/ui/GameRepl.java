@@ -1,7 +1,58 @@
 package ui;
 
+import exception.DataAccessException;
+import ui.connections.NotificationHandler;
+import ui.connections.ServerFacade;
+import ui.connections.WebSocketFacade;
+
+import javax.xml.crypto.Data;
+import java.util.Arrays;
+import java.util.Scanner;
+
 public class GameRepl {
-    public static void main(String[] args) {
+
+    private final ServerFacade server;
+
+    private final String serverUrl;
+    private String userName;
+
+    private NotificationHandler notificationHandler;
+
+    private ui.connections.WebSocketFacade ws;
+
+    private Integer gameID;
+
+    public GameRepl(ServerFacade server, String serverUrl, String userName, NotificationHandler notificationHandler, WebSocketFacade ws, int gameID) {
+        this.server = server;
+        this.serverUrl = serverUrl;
+        this.userName = userName;
+        this.notificationHandler = notificationHandler;
+        this.ws = ws;
+        this.gameID = gameID;
+    }
+    public void run() {
+
+        String[][] board = initializeBoard();
+
+        printBoard(board);
+
+        printBoardReverse(board);
+        
+        
+        System.out.print(displayHelp());
+
+        Scanner scanner = new Scanner(System.in);
+        String inputCommand;
+        do {
+            printPrompt();
+            inputCommand = scanner.nextLine().trim().toLowerCase();
+            String result = processCommand(inputCommand);
+            System.out.println(result);
+        } while (!inputCommand.equals("quit"));
+
+    }
+
+    private String[][] initializeBoard() {
         String[][] board = new String[8][8];
         boolean isWhiteSquare = true;
 
@@ -37,10 +88,66 @@ public class GameRepl {
         for (int i = 0; i < 8; i++) {
             board[6][i] = "p";
         }
+        return board;
+    }
 
-        printBoard(board);
+    private void printPrompt() {
+        System.out.print(">>> ");
+    }
+    public String processCommand(String input) {
+        try {
+            var tokens = input.toLowerCase().split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "help" -> displayHelp();
+                case "redraw" -> redrawChessBoard();
+                case "leave" -> leaveGame();
+                case "make" -> makeMove(params);
+                case "resign" -> resign();
+                case "highlight" -> highlightLegalMoves(params);
+                default -> "Invalid command. Type 'help' for available commands.";
+            };
+        } catch (DataAccessException ex) {
+            return ex.getMessage();
+        }
+    }
 
-        printBoardReverse(board);
+    private String displayHelp() {
+        return """
+            Available commands:
+            - help
+            - redraw : Redraws the chess board.
+            - leave : Remove yourself from the game.
+            - make <move>
+            - resign
+            - highlight <piece>
+            """;
+    }
+
+    private String redrawChessBoard() throws DataAccessException {
+        // Implementation for redrawing the chess board
+        return "Redrawing chess board...";
+    }
+
+    private String leaveGame() throws DataAccessException {
+        ws.leave(gameID);
+        return "Leaving game...";
+    }
+
+    private String makeMove(String[] params) throws DataAccessException {
+        // Implementation for making a move
+        return "Making move: " + String.join(" ", params);
+    }
+
+    private String resign() throws DataAccessException {
+        ws.resign(gameID);
+        return "Resigning from the game...";
+    }
+
+    private String highlightLegalMoves(String[] params) throws DataAccessException {
+        // Implementation for highlighting legal moves
+        return "Highlighting legal moves for piece: " + String.join(" ", params);
     }
 
     // Function to print the board in regular orientation

@@ -2,7 +2,7 @@ package ui;
 
 import exception.DataAccessException;
 import model.UserData;
-import server.ServerFacade;
+import ui.connections.ServerFacade;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -11,6 +11,7 @@ public class PreLoginRepl {
     private final ServerFacade server;
     private final String serverUrl;
     private String userName = null;
+    public static String authToken;
 
     public PreLoginRepl(String serverUrl) {
         server = new ServerFacade(serverUrl);
