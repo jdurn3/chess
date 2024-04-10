@@ -8,11 +8,14 @@ import exception.DataAccessException;
 import ui.connections.NotificationHandler;
 import ui.connections.ServerFacade;
 import ui.connections.WebSocketFacade;
+import webSocketMessages.serverMessages.ErrorMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.Notification;
 
 import javax.xml.crypto.Data;
 import java.util.*;
 
-public class GameRepl {
+public class GameRepl implements NotificationHandler {
 
     private final ServerFacade server;
 
@@ -20,29 +23,32 @@ public class GameRepl {
     private final ChessGame.TeamColor playerColor;
     private final String userName;
 
-    private final NotificationHandler notificationHandler;
+    private ChessGame game;
+    private final NotificationHandler notificationHandler = this;
 
-    private final ui.connections.WebSocketFacade ws;
-
+    private WebSocketFacade ws;
     private final Integer gameID;
+    private final String action;
 
-    public GameRepl(ServerFacade server, String serverUrl, String userName, NotificationHandler notificationHandler, WebSocketFacade ws, int gameID, ChessGame.TeamColor playerColor) {
+    public GameRepl(ServerFacade server, String serverUrl, String userName, String action, int gameID, ChessGame.TeamColor playerColor) {
         this.server = server;
         this.serverUrl = serverUrl;
         this.userName = userName;
-        this.notificationHandler = notificationHandler;
-        this.ws = ws;
         this.gameID = gameID;
         this.playerColor = playerColor;
+        this.action = action;
     }
     public void run() throws DataAccessException {
 
-        String[][] board = initializeBoard();
+        if (Objects.equals(action, "JOIN")) {
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.joinGame(gameID, playerColor);
+        }
 
-        printBoard(board);
-
-        printBoardReverse(board);
-        
+        if (Objects.equals(action, "OBSERVE")) {
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.observeGame(gameID);
+        }
         
         System.out.print(displayHelp());
 
@@ -57,42 +63,15 @@ public class GameRepl {
 
     }
 
-    private String[][] initializeBoard() throws DataAccessException {
-        String[][] board = new String[8][8];
-        ChessGame game = new ChessGame();
-                // Server.gameDAO.getGame(gameID).game();
 
-        // Initialize the board with empty squares
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                board[i][j] = " ";
-            }
-        }
-
-        // Populate the board with pieces from the game
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
-                if (piece != null) {
-                    String pieceSymbol = getPieceSymbol(piece);
-                    board[i][j] = pieceSymbol;
-                }
-            }
-        }
-
-        return board;
+    public void notificationHandler(Notification notification) {
+        System.out.println(notification.getNotification());
+        printPrompt();
     }
 
-    private String getPieceSymbol(ChessPiece piece) {
-        return switch (piece.getPieceType()) {
-            case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "K" : "k";
-            case QUEEN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "Q" : "q";
-            case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "B" : "b";
-            case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "N" : "n";
-            case ROOK -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "R" : "r";
-            case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "P" : "p";
-            default -> " "; // Empty square
-        };
+    public void errorHandler(ErrorMessage errorMessage) {
+        System.out.println(errorMessage.getError());
+        printPrompt();
     }
 
     private void printPrompt() {
@@ -130,7 +109,7 @@ public class GameRepl {
     }
 
     private String redrawChessBoard() throws DataAccessException {
-        // Implementation for redrawing the chess board
+        initializeBoard(new LoadGameMessage(game));
         return "Redrawing chess board...";
     }
 
@@ -141,7 +120,7 @@ public class GameRepl {
     }
 
     private String makeMove(String[] params) throws DataAccessException {
-        if (params.length >= 3) {
+        if (params.length >= 2) {
             String start = params[1];
             int [] startCoordinates = parseCoordinate(start);
             String end = params[2];
@@ -176,7 +155,51 @@ public class GameRepl {
 //            }
 //
 //            printBoard(highlightedBoard);
-        return "Highlighting legal moves for piece: " + String.join(" ", params);
+        return "Highlighting legal moves for piece: ";
+    }
+
+
+    @Override
+    public void initializeBoard(LoadGameMessage message) throws DataAccessException {
+        String[][] board = new String[8][8];
+        game = message.getGame();
+
+        // Initialize the board with empty squares
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                board[i][j] = " ";
+            }
+        }
+
+        // Populate the board with pieces from the game
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i+1, j+1));
+                if (piece != null) {
+                    String pieceSymbol = getPieceSymbol(piece);
+                    board[i][j] = pieceSymbol;
+                }
+            }
+        }
+
+        // Determine whether to print the board in regular or reverse orientation based on player's color
+        if (playerColor == ChessGame.TeamColor.WHITE || playerColor == null) {
+            printBoardReverse(board);
+        } else {
+            printBoard(board);
+        }
+    }
+
+    private String getPieceSymbol(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "K" : "k";
+            case QUEEN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "Q" : "q";
+            case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "B" : "b";
+            case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "N" : "n";
+            case ROOK -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "R" : "r";
+            case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "P" : "p";
+            default -> " "; // Empty square
+        };
     }
 
     // Function to print the board in regular orientation
@@ -186,23 +209,28 @@ public class GameRepl {
         for (int i = 0; i < 8; i++) {
             System.out.print((char) ('1' + i) + " ");
             for (int j = 0; j < 8; j++) {
-                if (isWhiteSquare) {
-                    System.out.print("\u001B[47m"); // White background
-                } else {
-                    System.out.print("\u001B[100m"); // Grey background
-                }
-
-                if (Character.isUpperCase(board[i][j].charAt(0))) {
-                    System.out.print("\u001B[34m" + " " + board[i][j] + " "); // Blue for white pieces
-                } else {
-                    System.out.print("\u001B[31m" + " " + board[i][j] + " "); // Red for black pieces
-                }
-
-                isWhiteSquare = !isWhiteSquare;
+                isWhiteSquare = isWhiteSquare(board, isWhiteSquare, i, j);
             }
             isWhiteSquare = !isWhiteSquare;
             System.out.println("\u001B[0m"); // Reset colors
         }
+    }
+
+    private static boolean isWhiteSquare(String[][] board, boolean isWhiteSquare, int i, int j) {
+        if (isWhiteSquare) {
+            System.out.print("\u001B[47m"); // White background
+        } else {
+            System.out.print("\u001B[100m"); // Grey background
+        }
+
+        if (Character.isUpperCase(board[i][j].charAt(0))) {
+            System.out.print("\u001B[34m" + " " + board[i][j] + " "); // Blue for white pieces
+        } else {
+            System.out.print("\u001B[31m" + " " + board[i][j] + " "); // Red for black pieces
+        }
+
+        isWhiteSquare = !isWhiteSquare;
+        return isWhiteSquare;
     }
 
     // Function to print the board in reverse orientation
@@ -212,19 +240,7 @@ public class GameRepl {
         for (int i = 7; i >= 0; i--) {
             System.out.print((char) ('1' + i) + " ");
             for (int j = 7; j >= 0; j--) {
-                if (isWhiteSquare) {
-                    System.out.print("\u001B[47m"); // White background
-                } else {
-                    System.out.print("\u001B[100m"); // Grey background
-                }
-
-                if (Character.isUpperCase(board[i][j].charAt(0))) {
-                    System.out.print("\u001B[34m" + " " + board[i][j] + " "); // Blue for white pieces
-                } else {
-                    System.out.print("\u001B[31m" + " " + board[i][j] + " "); // Red for black pieces
-                }
-
-                isWhiteSquare = !isWhiteSquare;
+                isWhiteSquare = isWhiteSquare(board, isWhiteSquare, i, j);
             }
             isWhiteSquare = !isWhiteSquare;
             System.out.println("\u001B[0m"); // Reset colors
@@ -249,25 +265,5 @@ public class GameRepl {
         return new int[]{rowIndex, columnIndex};
     }
 
-    public static ChessPiece.PieceType parsePieceType(String params3) {
-        if (params3 != null && !params3.isEmpty()) {
-            char pieceChar = params3.charAt(0);
-        // Map to store the mapping of letters to PieceType enums
-        Map<Character, ChessPiece.PieceType> pieceTypeMap = new HashMap<>();
-        pieceTypeMap.put('K', ChessPiece.PieceType.KING);
-        pieceTypeMap.put('Q', ChessPiece.PieceType.QUEEN);
-        pieceTypeMap.put('B', ChessPiece.PieceType.BISHOP);
-        pieceTypeMap.put('N', ChessPiece.PieceType.KNIGHT);
-        pieceTypeMap.put('R', ChessPiece.PieceType.ROOK);
-        pieceTypeMap.put('P', ChessPiece.PieceType.PAWN);
-
-        if (pieceTypeMap.containsKey(Character.toUpperCase(pieceChar))) {
-            return pieceTypeMap.get(Character.toUpperCase(pieceChar));
-        }
-
-        }
-
-        return null;
-    }
 
 }
