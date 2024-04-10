@@ -1,36 +1,41 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.DataAccessException;
 import ui.connections.NotificationHandler;
 import ui.connections.ServerFacade;
 import ui.connections.WebSocketFacade;
 
 import javax.xml.crypto.Data;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 public class GameRepl {
 
     private final ServerFacade server;
 
     private final String serverUrl;
-    private String userName;
+    private final ChessGame.TeamColor playerColor;
+    private final String userName;
 
-    private NotificationHandler notificationHandler;
+    private final NotificationHandler notificationHandler;
 
-    private ui.connections.WebSocketFacade ws;
+    private final ui.connections.WebSocketFacade ws;
 
-    private Integer gameID;
+    private final Integer gameID;
 
-    public GameRepl(ServerFacade server, String serverUrl, String userName, NotificationHandler notificationHandler, WebSocketFacade ws, int gameID) {
+    public GameRepl(ServerFacade server, String serverUrl, String userName, NotificationHandler notificationHandler, WebSocketFacade ws, int gameID, ChessGame.TeamColor playerColor) {
         this.server = server;
         this.serverUrl = serverUrl;
         this.userName = userName;
         this.notificationHandler = notificationHandler;
         this.ws = ws;
         this.gameID = gameID;
+        this.playerColor = playerColor;
     }
-    public void run() {
+    public void run() throws DataAccessException {
 
         String[][] board = initializeBoard();
 
@@ -52,9 +57,10 @@ public class GameRepl {
 
     }
 
-    private String[][] initializeBoard() {
+    private String[][] initializeBoard() throws DataAccessException {
         String[][] board = new String[8][8];
-        boolean isWhiteSquare = true;
+        ChessGame game = new ChessGame();
+                // Server.gameDAO.getGame(gameID).game();
 
         // Initialize the board with empty squares
         for (int i = 0; i < 8; i++) {
@@ -63,32 +69,30 @@ public class GameRepl {
             }
         }
 
-        // Set up white pieces
-        board[0][0] = "R";
-        board[0][1] = "N";
-        board[0][2] = "B";
-        board[0][3] = "Q";
-        board[0][4] = "K";
-        board[0][5] = "B";
-        board[0][6] = "N";
-        board[0][7] = "R";
+        // Populate the board with pieces from the game
         for (int i = 0; i < 8; i++) {
-            board[1][i] = "P";
+            for (int j = 0; j < 8; j++) {
+                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
+                if (piece != null) {
+                    String pieceSymbol = getPieceSymbol(piece);
+                    board[i][j] = pieceSymbol;
+                }
+            }
         }
 
-        // Set up black pieces
-        board[7][0] = "r";
-        board[7][1] = "n";
-        board[7][2] = "b";
-        board[7][3] = "q";
-        board[7][4] = "k";
-        board[7][5] = "b";
-        board[7][6] = "n";
-        board[7][7] = "r";
-        for (int i = 0; i < 8; i++) {
-            board[6][i] = "p";
-        }
         return board;
+    }
+
+    private String getPieceSymbol(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "K" : "k";
+            case QUEEN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "Q" : "q";
+            case BISHOP -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "B" : "b";
+            case KNIGHT -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "N" : "n";
+            case ROOK -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "R" : "r";
+            case PAWN -> piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "P" : "p";
+            default -> " "; // Empty square
+        };
     }
 
     private void printPrompt() {
@@ -132,11 +136,22 @@ public class GameRepl {
 
     private String leaveGame() throws DataAccessException {
         ws.leave(gameID);
+        PostLoginRepl.run();
         return "Leaving game...";
     }
 
     private String makeMove(String[] params) throws DataAccessException {
-        // Implementation for making a move
+        if (params.length >= 3) {
+            String start = params[1];
+            int [] startCoordinates = parseCoordinate(start);
+            String end = params[2];
+            int [] endCoordinates = parseCoordinate(end);
+           // need to put in all the error catching statements for if any of the inputs don't match
+            ChessPosition startPosition = new ChessPosition(startCoordinates[0], startCoordinates[1]);
+            ChessPosition endPosition = new ChessPosition(endCoordinates[0], endCoordinates[1]);
+            ChessMove move = new ChessMove(startPosition, endPosition, null);
+            ws.makeMove(gameID, move);
+        }
         return "Making move: " + String.join(" ", params);
     }
 
@@ -146,7 +161,21 @@ public class GameRepl {
     }
 
     private String highlightLegalMoves(String[] params) throws DataAccessException {
-        // Implementation for highlighting legal moves
+//            String startPosition = params[1];
+//            int[] coordinates = parseCoordinate(startPosition);
+//            ChessPosition position = new ChessPosition(coordinates[0], coordinates[1]);
+//            Collection<ChessMove> validMoves = game.validMoves(position);
+//
+//            // Print the board with highlighted valid moves
+//            String[][] highlightedBoard = initializeBoard();
+//            highlightedBoard[coordinates[0]][coordinates[1]] = "\u001B[43m" + " " + highlightedBoard[coordinates[0]][coordinates[1]] + " "; // Yellow highlight for selected square
+//
+//            for (ChessMove move : validMoves) {
+//                int[] endCoordinates = {move.getEndPosition().getRow(), move.getEndPosition().getColumn()};
+//                highlightedBoard[endCoordinates[0]][endCoordinates[1]] = "\u001B[42m" + " " + highlightedBoard[endCoordinates[0]][endCoordinates[1]] + " "; // Green highlight for valid moves
+//            }
+//
+//            printBoard(highlightedBoard);
         return "Highlighting legal moves for piece: " + String.join(" ", params);
     }
 
@@ -201,4 +230,44 @@ public class GameRepl {
             System.out.println("\u001B[0m"); // Reset colors
         }
     }
+
+    public static int[] parseCoordinate(String coordinate) throws DataAccessException {
+        if (coordinate.length() != 2) {
+            throw new DataAccessException("Invalid coordinate format: " + coordinate);
+        }
+
+        char column = Character.toUpperCase(coordinate.charAt(0));
+        int row = Character.getNumericValue(coordinate.charAt(1));
+
+        if (column < 'A' || column > 'H' || row < 1 || row > 8) {
+            throw new DataAccessException("Invalid coordinate format: " + coordinate);
+        }
+
+        int columnIndex = column - 'A'; // Convert column letter to zero-based index
+        int rowIndex = 8 - row; // Convert row number to zero-based index
+
+        return new int[]{rowIndex, columnIndex};
+    }
+
+    public static ChessPiece.PieceType parsePieceType(String params3) {
+        if (params3 != null && !params3.isEmpty()) {
+            char pieceChar = params3.charAt(0);
+        // Map to store the mapping of letters to PieceType enums
+        Map<Character, ChessPiece.PieceType> pieceTypeMap = new HashMap<>();
+        pieceTypeMap.put('K', ChessPiece.PieceType.KING);
+        pieceTypeMap.put('Q', ChessPiece.PieceType.QUEEN);
+        pieceTypeMap.put('B', ChessPiece.PieceType.BISHOP);
+        pieceTypeMap.put('N', ChessPiece.PieceType.KNIGHT);
+        pieceTypeMap.put('R', ChessPiece.PieceType.ROOK);
+        pieceTypeMap.put('P', ChessPiece.PieceType.PAWN);
+
+        if (pieceTypeMap.containsKey(Character.toUpperCase(pieceChar))) {
+            return pieceTypeMap.get(Character.toUpperCase(pieceChar));
+        }
+
+        }
+
+        return null;
+    }
+
 }

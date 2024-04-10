@@ -12,7 +12,9 @@ public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
     final ConcurrentHashMap<String, Integer> gamesToPlayers = new ConcurrentHashMap<>();
 
-
+    public Connection getSession(String authToken) {
+        return connections.get(authToken);
+    }
     public void add(String authToken, Session session) {
         var connection = new Connection(authToken, session);
         connections.put(authToken, connection);
@@ -50,6 +52,45 @@ public class ConnectionManager {
         // Clean up any connections that were left open.
         for (var c : removeList) {
             connections.remove(c.authToken);
+        }
+    }
+
+    public void notify(int gameId, ServerMessage serverMessage) throws IOException {
+        var removeList = new ArrayList<Connection>();
+
+        // Iterate over connections to find those in the specified game
+        for (var connection : connections.values()) {
+            if (connection.session.isOpen()) {
+                // Check if the user is in the specified game
+                if (gamesToPlayers.get(connection.authToken) == gameId) {
+                    connection.send(new Gson().toJson(serverMessage));
+                }
+            } else {
+                removeList.add(connection);
+            }
+        }
+
+        // Clean up any closed connections
+        for (var connection : removeList) {
+            connections.remove(connection.authToken);
+        }
+    }
+
+    public void removeGameFromPlayers(int gameID) {
+        // Create a list to store the tokens of connections to be removed
+        ArrayList<String> tokensToRemove = new ArrayList<>();
+
+        // Iterate over the entries in gamesToPlayers map
+        for (var entry : gamesToPlayers.entrySet()) {
+            // If the gameID matches the value associated with the token, remove it
+            if (entry.getValue() == gameID) {
+                tokensToRemove.add(entry.getKey());
+            }
+        }
+
+        // Remove the tokens from the gamesToPlayers map
+        for (String token : tokensToRemove) {
+            gamesToPlayers.remove(token);
         }
     }
 }

@@ -27,7 +27,7 @@ public class PostLoginRepl implements NotificationHandler {
         this.userName = userName;
     }
 
-    public void run() {
+    public static void run() {
         System.out.println("Welcome to the Chess, " + userName + ". You are now logged in.");
         System.out.print(displayHelp());
 
@@ -113,7 +113,7 @@ public class PostLoginRepl implements NotificationHandler {
             server.joinGame(gameID, parsedColor);
             WebSocketFacade ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.joinGame(gameID, parsedColor);
-            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID).run();
+            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID, parsedColor).run();
             return String.format("You successfully joined :  %s.", gameID);
         }
         throw new DataAccessException("Expected: <Game ID> [WHITE|BLACK|<empty>]");
@@ -124,7 +124,7 @@ public class PostLoginRepl implements NotificationHandler {
             server.joinGame(gameID, null);
             WebSocketFacade ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.observeGame(gameID);
-            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID).run();
+            new GameRepl(server, serverUrl, userName, notificationHandler, ws, gameID, null).run();
             return String.format("You are observing game :  %s.", gameID);
         }
         throw new DataAccessException("Expected: <Game ID> null");

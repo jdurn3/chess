@@ -1,6 +1,7 @@
 package ui.connections;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import ui.PreLoginRepl;
@@ -62,6 +63,16 @@ public class WebSocketFacade extends Endpoint {
         try {
             ObserveGame observeAction = new ObserveGame(UserGameCommand.CommandType.JOIN_OBSERVER, gameID, PreLoginRepl.authToken);
             String jsonAction = new Gson().toJson(observeAction);
+            session.getBasicRemote().sendText(jsonAction);
+        } catch (IOException ex) {
+            throw new DataAccessException(ex.getMessage());
+        }
+    }
+
+    public void makeMove(int gameID, ChessMove move) throws DataAccessException {
+        try {
+            MakeMove makeMove = new MakeMove(UserGameCommand.CommandType.MAKE_MOVE, gameID, move, PreLoginRepl.authToken);
+            String jsonAction = new Gson().toJson(makeMove);
             session.getBasicRemote().sendText(jsonAction);
         } catch (IOException ex) {
             throw new DataAccessException(ex.getMessage());

@@ -116,6 +116,62 @@ public class SQLGameDAO implements GameDAO{
             }
         return getGame(gameID);
     }
+    @Override
+    public void leaveGame(String username, int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            // Determine which field to update based on the provided username
+            String fieldName;
+            if (username != null && !username.isEmpty()) {
+                // Check if the provided username is associated with white or black player in the game
+                var gameData = getGame(gameID);
+                if (username.equals(gameData.whiteUsername())) {
+                    fieldName = "whiteUsername";
+                } else if (username.equals(gameData.blackUsername())) {
+                    fieldName = "blackUsername";
+                } else {
+                    // Username not found in the game, so no need to update
+                    return;
+                }
+            } else {
+                // Username is null or empty, so no need to update
+                return;
+            }
+
+            // Update the field to null for the specified game ID
+            var query = String.format("UPDATE games SET %s = NULL WHERE gameID = ?", fieldName);
+            try (var ps = conn.prepareStatement(query)) {
+                ps.setInt(1, gameID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to leave game: %s", e.getMessage()));
+        }
+    }
+    @Override
+    public void updateGame(int gameID, ChessGame updatedGame) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "UPDATE games SET game = ? WHERE gameID = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, new Gson().toJson(updatedGame));
+                ps.setInt(2, gameID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to update game: %s", e.getMessage()));
+        }
+    }
+    @Override
+    public void deleteGame(int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM games WHERE gameID=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to delete game: %s", e.getMessage()));
+        }
+    }
 
     private GameData readGames(ResultSet rs) throws SQLException {
         var gameID = rs.getInt("gameID");

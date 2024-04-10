@@ -63,5 +63,10 @@ public class GameMemoryAccess implements GameDAO{
         return newGame;
     }
 
+    public void leaveGame(String username, int gameID) throws DataAccessException {}
+
+    public void updateGame(int gameID, ChessGame updatedGame) throws DataAccessException {}
+
+    public void deleteGame(int gameID) throws DataAccessException {}
 
 }
