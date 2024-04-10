@@ -15,9 +15,8 @@ import java.util.Scanner;
 public class PostLoginRepl implements NotificationHandler {
     private final ServerFacade server;
     private final String serverUrl;
+
     private String userName;
-
-
     private final NotificationHandler notificationHandler = this;
 
 
