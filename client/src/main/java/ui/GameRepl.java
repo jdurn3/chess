@@ -136,7 +136,7 @@ public class GameRepl {
 
     private String leaveGame() throws DataAccessException {
         ws.leave(gameID);
-        PostLoginRepl.run();
+        //PostLoginRepl.run();
         return "Leaving game...";
     }
 

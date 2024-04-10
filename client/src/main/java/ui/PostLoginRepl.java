@@ -27,7 +27,7 @@ public class PostLoginRepl implements NotificationHandler {
         this.userName = userName;
     }
 
-    public static void run() {
+    public void run() {
         System.out.println("Welcome to the Chess, " + userName + ". You are now logged in.");
         System.out.print(displayHelp());
 
