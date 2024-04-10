@@ -11,10 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
     final ConcurrentHashMap<String, Integer> gamesToPlayers = new ConcurrentHashMap<>();
-
-    public Connection getSession(String authToken) {
-        return connections.get(authToken);
-    }
     public void add(String authToken, Session session) {
         var connection = new Connection(authToken, session);
         connections.put(authToken, connection);

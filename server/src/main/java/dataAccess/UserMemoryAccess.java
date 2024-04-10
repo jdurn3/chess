@@ -46,10 +46,4 @@ public class UserMemoryAccess implements UserDAO{
         }
     }
 
-    public boolean validPassword(UserData user) throws DataAccessException {
-        if (user.password() == null ) {
-            throw new DataAccessException(Constants.BAD_REQUEST);
-        }
-        return true;
-    }
 }
