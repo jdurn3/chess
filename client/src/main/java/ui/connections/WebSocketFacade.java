@@ -6,6 +6,9 @@ import com.google.gson.Gson;
 import exception.DataAccessException;
 import ui.PreLoginRepl;
 import ui.connections.NotificationHandler;
+import webSocketMessages.serverMessages.ErrorMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
@@ -35,7 +38,22 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                    notificationHandler.notify(serverMessage);
+                    switch (serverMessage.getServerMessageType()) {
+                        case NOTIFICATION:
+                            notificationHandler.notificationHandler(new Gson().fromJson(message, Notification.class));
+                            break;
+                        case LOAD_GAME:
+                            try {
+                                notificationHandler.initializeBoard(new Gson().fromJson(message, LoadGameMessage.class));
+                            } catch (DataAccessException e) {
+                                throw new RuntimeException(e);
+                            }
+                            break;
+                        case ERROR:
+                            notificationHandler.errorHandler(new Gson().fromJson(message, ErrorMessage.class));
+
+                            break;
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {

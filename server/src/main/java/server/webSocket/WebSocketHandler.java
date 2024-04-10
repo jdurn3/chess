@@ -190,8 +190,10 @@ public class WebSocketHandler {
         String username = user.username();
         String message = String.format("%s left the game", username);
         Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
+
+        //if
         connections.broadcast(authToken, notification);
-        Server.gameDAO.leaveGame(username, gameID);
+        //Server.gameDAO.leaveGame(username, gameID);
         connections.removePlayerFromGame(authToken, gameID);
     }
 
