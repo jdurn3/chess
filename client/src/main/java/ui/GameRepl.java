@@ -40,13 +40,13 @@ public class GameRepl implements NotificationHandler {
     }
     public void run() throws DataAccessException {
 
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
+
         if (Objects.equals(action, "JOIN")) {
-            ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.joinGame(gameID, playerColor);
         }
 
         if (Objects.equals(action, "OBSERVE")) {
-            ws = new WebSocketFacade(serverUrl, notificationHandler);
             ws.observeGame(gameID);
         }
         
@@ -121,9 +121,9 @@ public class GameRepl implements NotificationHandler {
 
     private String makeMove(String[] params) throws DataAccessException {
         if (params.length >= 2) {
-            String start = params[1];
+            String start = params[0];
             int [] startCoordinates = parseCoordinate(start);
-            String end = params[2];
+            String end = params[1];
             int [] endCoordinates = parseCoordinate(end);
            // need to put in all the error catching statements for if any of the inputs don't match
             ChessPosition startPosition = new ChessPosition(startCoordinates[0], startCoordinates[1]);
@@ -140,21 +140,7 @@ public class GameRepl implements NotificationHandler {
     }
 
     private String highlightLegalMoves(String[] params) throws DataAccessException {
-//            String startPosition = params[1];
-//            int[] coordinates = parseCoordinate(startPosition);
-//            ChessPosition position = new ChessPosition(coordinates[0], coordinates[1]);
-//            Collection<ChessMove> validMoves = game.validMoves(position);
-//
-//            // Print the board with highlighted valid moves
-//            String[][] highlightedBoard = initializeBoard();
-//            highlightedBoard[coordinates[0]][coordinates[1]] = "\u001B[43m" + " " + highlightedBoard[coordinates[0]][coordinates[1]] + " "; // Yellow highlight for selected square
-//
-//            for (ChessMove move : validMoves) {
-//                int[] endCoordinates = {move.getEndPosition().getRow(), move.getEndPosition().getColumn()};
-//                highlightedBoard[endCoordinates[0]][endCoordinates[1]] = "\u001B[42m" + " " + highlightedBoard[endCoordinates[0]][endCoordinates[1]] + " "; // Green highlight for valid moves
-//            }
-//
-//            printBoard(highlightedBoard);
+
         return "Highlighting legal moves for piece: ";
     }
 

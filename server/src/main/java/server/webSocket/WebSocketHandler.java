@@ -2,16 +2,13 @@ package server.webSocket;
 
 import chess.*;
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.Server;
-import service.UserService;
 import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.Notification;
@@ -19,23 +16,25 @@ import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException, DataAccessException, InvalidMoveException {
-        UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
-        switch (command.getCommandType()) {
-            case JOIN_PLAYER -> joinPlayer(new Gson().fromJson(message, JoinGame.class), session);
-            case JOIN_OBSERVER -> joinObserver(new Gson().fromJson(message, ObserveGame.class), session);
-            case MAKE_MOVE -> makeMove(new Gson().fromJson(message, MakeMove.class), session);
-            case LEAVE -> leave(new Gson().fromJson(message, Leave.class), session);
-            case RESIGN -> resign(new Gson().fromJson(message, Resign.class), session);
+        try {
+            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+            switch (command.getCommandType()) {
+                case JOIN_PLAYER -> joinPlayer(new Gson().fromJson(message, JoinGame.class), session);
+                case JOIN_OBSERVER -> joinObserver(new Gson().fromJson(message, ObserveGame.class), session);
+                case MAKE_MOVE -> makeMove(new Gson().fromJson(message, MakeMove.class), session);
+                case LEAVE -> leave(new Gson().fromJson(message, Leave.class), session);
+                case RESIGN -> resign(new Gson().fromJson(message, Resign.class), session);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     private void joinPlayer(JoinGame command, Session session) throws IOException, DataAccessException {
@@ -156,7 +155,6 @@ public class WebSocketHandler {
 
         ChessPosition position = move.getStartPosition();
         ChessPiece.PieceType piece = game.getBoard().getPiece(position).getPieceType();
-        ChessMove newMove = new ChessMove(move.getStartPosition(), move.getEndPosition(), piece);
         ChessGame.TeamColor pieceColor = game.getBoard().getPiece(position).getTeamColor();
 
         if (!pieceColor.equals(color)) {
@@ -172,8 +170,10 @@ public class WebSocketHandler {
 
             // If the move is valid, proceed to load the game and broadcast the update
             LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-            connections.notify(gameID, loadGameMessage);
-            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, username);
+            session.getRemote().sendString(new Gson().toJson(loadGameMessage));
+            connections.broadcast(authToken, loadGameMessage);
+            String message = username + "moved their" + piece;
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(authToken, notification);
         } catch (InvalidMoveException e) {
             // If an InvalidMoveException is caught, the move is invalid

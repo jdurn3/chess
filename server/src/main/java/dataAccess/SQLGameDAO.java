@@ -37,9 +37,9 @@ public class SQLGameDAO implements GameDAO{
     public int createGame(String gameName) throws DataAccessException {
         ChessGame game = new ChessGame();
         game.getBoard().resetBoard();
-        String stored_game = new Gson().toJson(game);
+        String storedGame = new Gson().toJson(game);
         var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
-        return executeUpdate(statement, gameName, stored_game);
+        return executeUpdate(statement, gameName, storedGame);
     }
 
     @Override
@@ -220,6 +220,10 @@ public class SQLGameDAO implements GameDAO{
     };
 
     private void configureDatabase() throws DataAccessException {
+        duplicate(createStatements);
+    }
+
+    static void duplicate(String[] createStatements) throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {

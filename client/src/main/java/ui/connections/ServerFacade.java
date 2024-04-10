@@ -47,9 +47,9 @@ public class ServerFacade {
 
     public GameData[] listGames() throws DataAccessException {
         var path = "/game";
-        record listGameResponse(GameData[] games) {
+        record ListGameResponse(GameData[] games) {
         }
-        var response = this.makeRequest("GET", path, null, listGameResponse.class, PreLoginRepl.authToken);
+        var response = this.makeRequest("GET", path, null, ListGameResponse.class, PreLoginRepl.authToken);
         return response.games();
     }
 
