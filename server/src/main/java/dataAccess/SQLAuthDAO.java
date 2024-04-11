@@ -70,7 +70,7 @@ public class SQLAuthDAO implements AuthDAO{
         executeUpdate(statement, authToken);
     }
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+    static int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {

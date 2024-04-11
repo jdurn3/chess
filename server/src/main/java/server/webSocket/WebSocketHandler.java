@@ -22,19 +22,14 @@ public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException, DataAccessException, InvalidMoveException {
-        try {
-            UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
-            switch (command.getCommandType()) {
-                case JOIN_PLAYER -> joinPlayer(new Gson().fromJson(message, JoinGame.class), session);
-                case JOIN_OBSERVER -> joinObserver(new Gson().fromJson(message, ObserveGame.class), session);
-                case MAKE_MOVE -> makeMove(new Gson().fromJson(message, MakeMove.class), session);
-                case LEAVE -> leave(new Gson().fromJson(message, Leave.class), session);
-                case RESIGN -> resign(new Gson().fromJson(message, Resign.class), session);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+        switch (command.getCommandType()) {
+            case JOIN_PLAYER -> joinPlayer(new Gson().fromJson(message, JoinGame.class), session);
+            case JOIN_OBSERVER -> joinObserver(new Gson().fromJson(message, ObserveGame.class), session);
+            case MAKE_MOVE -> makeMove(new Gson().fromJson(message, MakeMove.class), session);
+            case LEAVE -> leave(new Gson().fromJson(message, Leave.class), session);
+            case RESIGN -> resign(new Gson().fromJson(message, Resign.class), session);
         }
-
     }
 
     private void joinPlayer(JoinGame command, Session session) throws IOException, DataAccessException {
@@ -154,7 +149,6 @@ public class WebSocketHandler {
         }
 
         ChessPosition position = move.getStartPosition();
-        ChessPiece.PieceType piece = game.getBoard().getPiece(position).getPieceType();
         ChessGame.TeamColor pieceColor = game.getBoard().getPiece(position).getTeamColor();
 
         if (!pieceColor.equals(color)) {
@@ -172,7 +166,7 @@ public class WebSocketHandler {
             LoadGameMessage loadGameMessage = new LoadGameMessage(game);
             session.getRemote().sendString(new Gson().toJson(loadGameMessage));
             connections.broadcast(authToken, loadGameMessage);
-            String message = username + "moved their" + piece;
+            String message = username + "moved";
             Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(authToken, notification);
         } catch (InvalidMoveException e) {

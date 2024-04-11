@@ -86,7 +86,7 @@ public class GameRepl implements NotificationHandler {
                 case "help" -> displayHelp();
                 case "redraw" -> redrawChessBoard();
                 case "leave" -> leaveGame();
-                case "make" -> makeMove(params);
+                case "move" -> makeMove(params);
                 case "resign" -> resign();
                 case "highlight" -> highlightLegalMoves(params);
                 default -> "Invalid command. Type 'help' for available commands.";
@@ -102,7 +102,7 @@ public class GameRepl implements NotificationHandler {
             - help
             - redraw : Redraws the chess board.
             - leave : Remove yourself from the game.
-            - make <move>
+            - move <move>
             - resign
             - highlight <piece>
             """;
@@ -115,7 +115,7 @@ public class GameRepl implements NotificationHandler {
 
     private String leaveGame() throws DataAccessException {
         ws.leave(gameID);
-        //PostLoginRepl.run();
+        new PostLoginRepl(server, serverUrl, userName).run();
         return "Leaving game...";
     }
 
@@ -126,8 +126,8 @@ public class GameRepl implements NotificationHandler {
             String end = params[1];
             int [] endCoordinates = parseCoordinate(end);
            // need to put in all the error catching statements for if any of the inputs don't match
-            ChessPosition startPosition = new ChessPosition(startCoordinates[0], startCoordinates[1]);
-            ChessPosition endPosition = new ChessPosition(endCoordinates[0], endCoordinates[1]);
+            ChessPosition startPosition = new ChessPosition(startCoordinates[0] + 1, startCoordinates[1] + 1);
+            ChessPosition endPosition = new ChessPosition(endCoordinates[0] + 1, endCoordinates[1] + 1);
             ChessMove move = new ChessMove(startPosition, endPosition, null);
             ws.makeMove(gameID, move);
         }
@@ -222,9 +222,9 @@ public class GameRepl implements NotificationHandler {
     // Function to print the board in reverse orientation
     public static void printBoardReverse(String[][] board) {
         boolean isWhiteSquare = true;
-        System.out.println("  H  G  F  E  D  C  B  A");
+        System.out.println("  A  B  C  D  E  F  G  H");
         for (int i = 7; i >= 0; i--) {
-            System.out.print((char) ('1' + i) + " ");
+            System.out.print((char) ('8' - i) + " ");
             for (int j = 7; j >= 0; j--) {
                 isWhiteSquare = isWhiteSquare(board, isWhiteSquare, i, j);
             }
@@ -245,8 +245,9 @@ public class GameRepl implements NotificationHandler {
             throw new DataAccessException("Invalid coordinate format: " + coordinate);
         }
 
-        int columnIndex = column - 'A'; // Convert column letter to zero-based index
-        int rowIndex = 8 - row; // Convert row number to zero-based index
+        // Direct conversion for zero-based row and column (H1 becomes 0, 0)
+        int columnIndex = column - 'A';
+        int rowIndex = row - 1; // Adjust row by subtracting 1 for zero-based indexing
 
         return new int[]{rowIndex, columnIndex};
     }
