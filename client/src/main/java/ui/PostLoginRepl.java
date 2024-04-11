@@ -28,8 +28,9 @@ public class PostLoginRepl {
         System.out.println("Welcome to the Chess, " + userName + ". You are now logged in.");
         System.out.print(displayHelp());
 
-        Scanner scanner = new Scanner(System.in);
         String inputCommand;
+        Scanner scanner = new Scanner(System.in);
+
         do {
             printPrompt();
             inputCommand = scanner.nextLine().trim().toLowerCase();
