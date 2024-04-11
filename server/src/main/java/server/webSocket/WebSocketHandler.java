@@ -166,7 +166,7 @@ public class WebSocketHandler {
             LoadGameMessage loadGameMessage = new LoadGameMessage(game);
             session.getRemote().sendString(new Gson().toJson(loadGameMessage));
             connections.broadcast(authToken, loadGameMessage);
-            String message = username + "moved";
+            String message = username + " moved";
             Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(authToken, notification);
         } catch (InvalidMoveException e) {
