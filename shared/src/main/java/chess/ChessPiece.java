@@ -209,34 +209,9 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> validMoves = new HashSet<>();
-        ChessPosition front = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn());
-        ChessPosition back = new ChessPosition(myPosition.getRow()-1, myPosition.getColumn());
-        ChessPosition left = new ChessPosition(myPosition.getRow(), myPosition.getColumn()-1);
-        ChessPosition right = new ChessPosition(myPosition.getRow(), myPosition.getColumn()+1);
-        duplicate(board, myPosition, validMoves);
-
-        while (inbounds(front)) {
-            if (duplicate2(board, myPosition, validMoves, front)) break;
-            front = new ChessPosition(front.getRow()+1, myPosition.getColumn());
-        }
-
-        while (inbounds(back)) {
-            if (duplicate2(board, myPosition, validMoves, back)) break;
-            back = new ChessPosition(back.getRow()-1, myPosition.getColumn());
-        }
-
-        while (inbounds(left)) {
-            if (duplicate2(board, myPosition, validMoves, left)) break;
-            left = new ChessPosition(myPosition.getRow(), left.getColumn()-1);
-        }
-
-        while (inbounds(right)) {
-            if (duplicate2(board, myPosition, validMoves, right)) break;
-            right = new ChessPosition(myPosition.getRow(), right.getColumn()+1);
-        }
-        return validMoves;
+        return rookMoves(board, myPosition);
     }
+
 
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> validMoves = new HashSet<>();
